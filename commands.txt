@@ -1,0 +1,4 @@
+# 推流本地视频文件
+ffmpeg -re -stream_loop -1 -i ./runs/grid_demo.mp4 -vcodec copy -rtsp_transport udp -f rtsp rtsp://localhost/grid/video1
+
+ffmpeg -re -stream_loop -1 -i ./runs/grid_demo.mp4 -vcodec copy -s 800*600 -rtsp_transport udp -f rtsp rtsp://localhost/grid/video1
