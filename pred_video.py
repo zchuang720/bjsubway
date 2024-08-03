@@ -1,3 +1,5 @@
+import sys
+sys.path.append("..")
 import multiprocessing as mp
 import handler2
 import handler
@@ -16,11 +18,11 @@ import multiprocessing
 
 def pred_video():
     context = {'post_data': {'name': '', 'equipmentId': '', }}
-    handler.video_alarm_handler(video_addr=r'/home/user/bjtu/bjsubway/resources/new_fire_underground.mp4',
-                                model=r'/home/user/bjtu/bjsubway/weights/fire_size1280_0719.pt',
-                                alarm_func=fire_alarm, plot_func=fire_plot,
-                                interval=0., display=True, display_shape=0.5,
-                                save=True, loop=False,imgsz=1920,
+    handler.video_alarm_handler(video_addr=r'resources/grid_4_cut.mp4',
+                                model=r'weights/tunne-carl-l-seg-best.pt',
+                                alarm_func=None, plot_func=None,
+                                interval=0.2, display=True, display_shape=0.5,
+                                save=False, loop=False, imgsz=1920,
                                 context=context)
 
 
