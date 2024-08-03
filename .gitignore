@@ -1,9 +1,19 @@
-# User config
+# env and run file
 vscode/
-resources/
 runs/
-weights/
+weights/archives/
 logs/
+
+# media file
+*.jpg
+*.png
+*.mp4
+*.avi
+*.dav
+
+# archive file
+*.zip
+*.tar
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
