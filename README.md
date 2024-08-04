@@ -17,20 +17,20 @@
 
 ### 已开发场景
 1. 动火场景
-![img](doc\img\fire.jpg)
+![img](doc/img/fire.jpg)
 
 2. 明挖工程
-![img](doc\img\pipe.jpg)
+![img](doc/img/pipe.jpg)
 
 3. 暗挖工程
-![img](doc\img\tunnel.jpg)
+![img](doc/img/tunnel.jpg)
 
 ### 性能监控
 1. 内存使用
-![img](doc\img\mem.png)
+![img](doc/img/mem.png)
 
 2. 处理帧率
-![img](doc\img\fps.jpg)
+![img](doc/img/fps.jpg)
 
 </details>
 
