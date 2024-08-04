@@ -15,7 +15,7 @@ def pred_video():
                                 alarm_func=tunnel_alarm, plot_func=tunnel_plot,
                                 interval=0.5, display=True, display_shape=0.5,
                                 save=False, loop=False, imgsz=640,
-                                context=context)
+                                monitor=True, context=context)
 
 
 def mp_test():
