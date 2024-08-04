@@ -7,7 +7,7 @@
 - 精度与性能最优的目标检测和分割模型
 - 可靠、通用和易扩展的系统服务
 - 心跳机制的多进程监视和故障重启
-- 适配多种应用场景
+- 适配多个应用场景
 
 ## 功能效果
 <details>
@@ -49,16 +49,17 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+#### 主程序：
 1. 配置 properties.py 接入视频流地址和推流地址、第三方接入系统地址
 2. 启动主程序：
-    ```
-    python main.py
-    ```
-- 测试预测视频：
+```
+python main.py
+```
+测试预测视频：
 ```
 python pred_video.py
 ```
-- 训练模型：
+训练模型：
 ```
 python train.py
 ```
