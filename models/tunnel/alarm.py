@@ -10,14 +10,16 @@ import multiprocessing as mp
 from copy import deepcopy
 from ultralytics import YOLO
 
+import utils.imgproc
+
 sys.path.append("../../")
-import util
+import utils
 import properties
 import  models.tunnel.data as tunnel_data
 from models.tunnel.process import *
 
 
-def grid_alarm(pred_result, context, **kwargs):
+def tunnel_alarm(pred_result, context, **kwargs):
     ret = deepcopy(tunnel_data.grid_alarm_result)
     refine_result = deepcopy(pred_result)
     logger = logging.getLogger(context['logger_name'])
@@ -33,39 +35,42 @@ def grid_alarm(pred_result, context, **kwargs):
     event_id = 999
     # 有开挖面
     if check_has_woking_face(refine_result):
-        during = update_event_duration(context, event_id=event_finish_dig, if_happen=True)
-        if during > event_timeout[event_finish_dig]:
+        duration = update_event_duration(context, event_id=event_finish_dig, is_happen=True)
+        # 挖面超过设定时间报警
+        if duration > event_timeout[event_finish_dig]:
             event_id = min(event_id, event_finish_dig)
             alarm_event_id.append(19)
     # 无开挖面
     else:
-        update_event_duration(context, event_id=event_finish_dig, if_happen=False)
+        update_event_duration(context, event_id=event_finish_dig, is_happen=False)
         event_id = min(event_id, event_doing_dig)
 
-    # 有卡车
+    # 有卡车->正在挖
     if check_has_truck(refine_result):
         event_id = min(event_id, event_doing_dig)
-        update_event_duration(context, event_id=event_doing_dig, if_happen=False)
+        update_event_duration(context, event_id=event_doing_dig, is_happen=False)
     # 无卡车
     else:
-        during = update_event_duration(context, event_id=event_doing_dig, if_happen=True)
-        # 小于 2 小时 (暂定)
-        if during < event_timeout[event_doing_dig]:
+        duration = update_event_duration(context, event_id=event_doing_dig, is_happen=True)
+        # 小于 2 小时 (暂定)->没挖完
+        if duration < event_timeout[event_doing_dig]:
             event_id = min(event_id, event_finish_dig)
         # 大于 2 小时
         else:
-            # 有人
+            # 有人->挖完了
             if check_has_person(refine_result):
                 event_id = min(event_id, event_stop_working)
-                update_event_duration(context, event_id=event_finish_dig, if_happen=False)
-            # 无人
+                update_event_duration(context, event_id=event_finish_dig, is_happen=False)
+            # 无人->停工了
             else:
                 event_id = min(event_id, event_finish_dig)
-                during = update_event_duration(context, event_id=event_finish_dig, if_happen=True)
+                duration = update_event_duration(context, event_id=event_finish_dig, is_happen=True)
                 # 大于 y 小时
-                if during > event_timeout[event_finish_dig]:
+                if duration > event_timeout[event_finish_dig]:
                     event_id = min(event_id, event_stop_working)
                     alarm_event_id.append(18)
+    
+    # print([f"{key}: {context[key]}" for key in context if key.startswith("event")])
 
 
     """
@@ -110,7 +115,7 @@ def grid_alarm(pred_result, context, **kwargs):
         context['post_time'] = post_time
         # context['post_alarm_event_id'] = alarm_event_id
 
-        alarm_image = grid_plot(pred_result.orig_img, ret)
+        alarm_image = tunnel_plot(pred_result.orig_img, ret)
         cv2.imwrite(f"{properties.alarm_image_save_path}/pipe-{post_time}.jpg", alarm_image)
 
         post_data = copy.deepcopy(properties.post_data_dict)
@@ -132,20 +137,20 @@ def grid_alarm(pred_result, context, **kwargs):
 
         if 'post_data' in context and context['post_data'] is not None:
             camera_alarm_data.update(context['post_data'])
-        camera_alarm_data["md5Check"] = util.generate_md5_checksum(camera_alarm_data["equipmentId"] 
+        camera_alarm_data["md5Check"] = utils.net.generate_md5_checksum(camera_alarm_data["equipmentId"] 
                                                                    + camera_alarm_data["time"] 
                                                                    + camera_alarm_data["alarmType"] + properties.md5_salt)
         post_data["data"].append(camera_alarm_data)
         
         logger.info(f'📨 {post_data}')
 
-        camera_alarm_data["alarmImage"] = util.image_to_base64(alarm_image, resize_f=1.)
-        util.post(properties.post_addr, post_data, logger=logger)
+        camera_alarm_data["alarmImage"] = utils.imgproc.image_to_base64(alarm_image, resize_f=1.)
+        utils.net.post(properties.post_addr, post_data, logger=logger)
 
     return ret
 
 
-def grid_plot(img, alarm_result, **kwargs):
+def tunnel_plot(img, alarm_result, **kwargs):
     img_ret = deepcopy(img)
     # 画边界框
     if 'polygon' in alarm_result:
@@ -154,10 +159,6 @@ def grid_plot(img, alarm_result, **kwargs):
     if 'refine_result' in alarm_result:
         img_ret = alarm_result['refine_result'].plot(img=img_ret, conf=False)
         # boxes = alarm_result['refine_result'].boxes.xyxy.cpu().numpy().astype(np.int32)
-        # centers = np.array([[(boxes[i][0] + boxes[i][2]) / 2, (boxes[i][1] + boxes[i][3]) / 2]
-        #                         for i in range(len(boxes))]).astype(np.int32)
-        # for center in centers:
-        #     cv2.circle(img_ret, center, 3, (0,255,0), 3)
     # 画警报信息
     if 'display_info' in alarm_result:
         img_ret = draw_text(img_ret, alarm_result['display_info'])

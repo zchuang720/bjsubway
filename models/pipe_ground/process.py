@@ -13,7 +13,7 @@ from ultralytics import YOLO
 from ultralytics.engine.results import Boxes, Results
 
 sys.path.append("../../")
-import util
+import utils
 import properties
 from models.pipe_ground.data import *
 
@@ -146,7 +146,7 @@ def update_history(context, pairs, curr_xyxy_list):
             rcd_matched.append(idx1)
             curr_matched.append(idx2)
             rcd_xyxy_list[idx1] = (rcd_xyxy_list[idx1] + curr_xyxy_list[idx2]) / 2
-            rcd_cnt_list[idx1] = min(rcd_cnt_list[idx1] + 1, 60)
+            rcd_cnt_list[idx1] = min(rcd_cnt_list[idx1] + 1, timer_duration)
         # 添加新记录
         curr_mismatched = [i for i in range(len(curr_xyxy_list)) if i not in curr_matched]
         for i in curr_mismatched:

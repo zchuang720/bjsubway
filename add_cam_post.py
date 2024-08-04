@@ -1,6 +1,6 @@
 import copy
 
-import util
+import utils.net as net
 import properties
 
 '''
@@ -91,13 +91,13 @@ def add_cam_post():
 
         camera_add_data.update(cam)
 
-        camera_add_data["md5Check"] = util.generate_md5_checksum(
+        camera_add_data["md5Check"] = net.generate_md5_checksum(
                                             camera_add_data["cameraUrl"] + camera_add_data["equipmentId"] \
                                             + properties.md5_salt)
         post_data["data"].append(camera_add_data)
 
         print(post_data)
-        util.post(properties.post_addr, post_data)
+        net.post(properties.post_addr, post_data)
 
 
 if __name__ == "__main__":

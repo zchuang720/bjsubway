@@ -16,7 +16,7 @@ from ultralytics import YOLO
 from ultralytics.engine.results import Boxes, Results
 
 sys.path.append(".")
-import util
+import utils.net as net
 import properties
 import config
 from models.fire.alarm import fire_alarm, fire_plot
@@ -44,13 +44,13 @@ def test_post():
     camera_alarm_data["latitude"] = ""
     camera_alarm_data["longitude"] = ""
     camera_alarm_data["alarmInfo"] = ""
-    camera_alarm_data["md5Check"] = util.generate_md5_checksum(
+    camera_alarm_data["md5Check"] = net.generate_md5_checksum(
                                         camera_alarm_data["brand"] + camera_alarm_data["equipmentId"] \
                                         + properties.md5_salt)
     post_data["data"].append(camera_alarm_data)
     print(post_data)
     
-    util.post(properties.post_addr, post_data)
+    net.post(properties.post_addr, post_data)
 
 
 def test_video_stream(video_addr):

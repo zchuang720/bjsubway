@@ -34,3 +34,6 @@ translated_cls_name = {
     id_pipe_bottom: '钢支撑',
     id_target_anchor: '托盘',
 }
+
+
+timer_duration = 20

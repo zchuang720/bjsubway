@@ -1,5 +1,6 @@
 import os
 os.environ['YOLO_VERBOSE'] = 'False'    # Don't adjust the position of this code
+
 import sys
 import cv2
 import copy
@@ -17,8 +18,13 @@ from ultralytics.engine.results import Results
 from memory_profiler import memory_usage
 
 sys.path.append(".")
-import util
+import utils
 import config
+
+from utils.imgproc import BufferlessVideoCapture, draw_text
+from utils.monitor import FpsMonitor
+from utils.playback import PlaybackHandler
+from utils.stream import StreamPusher
 
 def video_alarm_handler(video_addr:str, model, interval:float=1., 
                         alarm_func=None, plot_func=None, 
@@ -80,7 +86,7 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
         logger.warning(f'🛑 Cannot get video {video_addr}, about to exit')
 
     if stream:
-        capture = util.BufferlessVideoCapture(capture, logger=logger)
+        capture = BufferlessVideoCapture(capture, logger=logger)
 
     # 创建视频显示
     if display:
@@ -105,14 +111,14 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
         push_shape = [int(shape[0] * kwargs['push_shape']), int(shape[1] * kwargs['push_shape'])]
         for i in range(len(push_shape)):    # 令视频高宽变为偶数
             if push_shape[i] % 2 == 1: push_shape[i] += 1
-        stream_pusher = util.StreamPusher(url=kwargs['push_url'], shape=push_shape, fps=fps)
+        stream_pusher = StreamPusher(url=kwargs['push_url'], shape=push_shape, fps=fps)
 
     # 创建回放处理
     if playback:
         playback_resize_f = 0.5
         playback_shape = (int(shape[0] * playback_resize_f), int(shape[1] * playback_resize_f))
         playback_buff = mp.Queue(fps)
-        playback_proc = mp.Process(target=util.PlaybackHandler.playbcak_proc_task, daemon=True,
+        playback_proc = mp.Process(target=PlaybackHandler.playbcak_proc_task, daemon=True,
                                     kwargs={'in_conn': playback_buff, 'shape': playback_shape, 'fps': fps ,
                                             'trace_time': 60., 'log_file': log_file })
         playback_proc.start()
@@ -120,7 +126,7 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
     
     # FPS
     if monitor:
-        monitor = util.FpsMonitor(window_size=60, flash_interval=2.)
+        monitor = FpsMonitor(window_size=60, flash_interval=2.)
     
     # 初始化计时
     context['prev_detect_time'] = 0
@@ -154,7 +160,7 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
             # 目标检测
             if curr_loop_time - context['prev_detect_time'] > interval:
                 laplacian_fuzzy = False
-                # laplacian_fuzzy = util.variance_of_laplacian(cv2.resize(frame, (0,0), fx=0.3, fy=0.3))
+                # laplacian_fuzzy = utils.imgproc.variance_of_laplacian(cv2.resize(frame, (0,0), fx=0.3, fy=0.3))
                 # laplacian_fuzzy = laplacian_fuzzy < config.laplacian_threshold
                 # if laplacian_fuzzy:
                 #     logger.info('laplacian fuzzy')
@@ -171,7 +177,7 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
             # plot到当前帧
             if enable_plot:
                 if laplacian_fuzzy:
-                    annotated_frame = util.draw_text(frame, [f"{context['post_data']['name'].split('-')[-1]}路", "当前图像模糊"])
+                    annotated_frame = draw_text(frame, [f"{context['post_data']['name'].split('-')[-1]}路", "当前图像模糊"])
                 else:
                     if plot_func is not None:
                         annotated_frame = plot_func(frame, alarm_result=alarm_result, context=context)

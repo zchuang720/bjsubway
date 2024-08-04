@@ -9,7 +9,7 @@ import multiprocessing
 from ultralytics import YOLO
 
 sys.path.append(".")
-import util
+import utils.net as net
 import handler
 import properties
 import test

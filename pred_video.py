@@ -1,28 +1,20 @@
 import sys
 sys.path.append("..")
 import multiprocessing as mp
-import handler2
 import handler
 from models.fire.alarm import fire_alarm, fire_plot
 from models.grid.alarm import grid_alarm, grid_plot
 from models.pipe_ground.alarm import pipe_alarm, pipe_plot
+from models.tunnel.alarm import tunnel_alarm, tunnel_plot
 import multiprocessing
-# def pred_video():
-#     context = {'post_data': {'name': '', 'equipmentId': '', }}
-#     handler2.video_alarm_handler(video_addr=r'/home/user/bjtu/bjsubway/resources/new_pipe_raw.mp4',
-#                                 model=r'/home/user/bjtu/bjsubway/weights/pipe_ground_seg_l_v1_size1280.pt',
-#                                 alarm_func=pipe_alarm, plot_func=pipe_plot,
-#                                 interval=0., display=True, display_shape=0.5,
-#                                 save=True, loop=False,imgsz=1920,
-#                                 context=context,fps_stride=25)
 
 def pred_video():
     context = {'post_data': {'name': '', 'equipmentId': '', }}
-    handler.video_alarm_handler(video_addr=r'resources/grid_4_cut.mp4',
-                                model=r'weights/tunne-carl-l-seg-best.pt',
-                                alarm_func=None, plot_func=None,
-                                interval=0.2, display=True, display_shape=0.5,
-                                save=False, loop=False, imgsz=1920,
+    handler.video_alarm_handler(video_addr=r'resources\tunnel01.mp4',
+                                model=r'weights\tunne-carl-l-seg-best.pt',
+                                alarm_func=tunnel_alarm, plot_func=tunnel_plot,
+                                interval=0.5, display=True, display_shape=0.5,
+                                save=False, loop=False, imgsz=640,
                                 context=context)
 
 

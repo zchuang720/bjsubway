@@ -10,8 +10,10 @@ import multiprocessing as mp
 from copy import deepcopy
 from ultralytics import YOLO
 
+import utils.imgproc
+
 sys.path.append("../../")
-import util
+import utils
 import properties
 import models.fire.data as fire_data
 from models.fire.process import *
@@ -114,15 +116,15 @@ def fire_alarm(pred_result, context, **kwargs):
 
         if 'post_data' in context and context['post_data'] is not None:
             camera_alarm_data.update(context['post_data'])
-        camera_alarm_data["md5Check"] = util.generate_md5_checksum(camera_alarm_data["equipmentId"] 
+        camera_alarm_data["md5Check"] = utils.net.generate_md5_checksum(camera_alarm_data["equipmentId"] 
                                                                    + camera_alarm_data["time"] 
                                                                    + camera_alarm_data["alarmType"] + properties.md5_salt)
         post_data["data"].append(camera_alarm_data)
         
         logger.info(f'📨 {post_data}')
         
-        camera_alarm_data["alarmImage"] = util.image_to_base64(alarm_image, resize_f=1.)
-        util.post(properties.post_addr, post_data, logger=logger)
+        camera_alarm_data["alarmImage"] = utils.imgproc.image_to_base64(alarm_image, resize_f=1.)
+        utils.net.post(properties.post_addr, post_data, logger=logger)
     
     return ret
 

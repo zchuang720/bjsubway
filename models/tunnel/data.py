@@ -14,10 +14,10 @@ grid_alarm_result = {
 }
 
 # 标签类别
-id_steel = 0
-id_person = 1
-id_working_face = 2
-id_truck = 4
+id_person = 0
+id_working_face = 1
+id_steel = 2
+id_truck = 3
 
 # 事件类型
 event_finish_dig = 1
@@ -25,17 +25,17 @@ event_doing_dig = 2
 event_stop_working = 3
 
 event_timeout = {
-    event_finish_dig: 60,
-    event_doing_dig: 60 * 60 * 2,
-    event_stop_working: 60
+    event_finish_dig: 2,
+    event_doing_dig: 2 * 1 * 2,
+    event_stop_working: 2
 }
 
 
 translated_cls_name = {
     id_steel: '钢架',
     id_person: '人',
-    id_working_face: '开挖面',
-    id_truck: "卡车",
+    id_working_face: '挖面',
+    id_truck: "车",
 }
 
 yolo_cls_buff_size = 3

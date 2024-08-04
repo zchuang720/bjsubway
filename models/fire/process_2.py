@@ -12,7 +12,7 @@ from ultralytics.engine.results import Boxes, Results
 from ultralytics.engine import predictor
 
 sys.path.append("../../")
-import util
+import utils
 import data
 import models.fire.data as fire_data
 

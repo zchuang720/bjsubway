@@ -5,26 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 import properties
 from models.tunnel.data import *
-
-# 判断类别缓冲函数装饰器，用于减轻结果波动
-def yolo_cls_buff(size=3):
-    def decorator(func):
-        has_cls = False
-        cnt = 0
-        def wrapper(*args, **kwargs):
-            nonlocal has_cls, cnt
-            ret = func(*args, **kwargs)
-            if ret:
-                cnt = min(cnt + 1, size)
-            else:
-                cnt = max(0, cnt - 1)
-            if not has_cls and cnt == size:
-                has_cls = True
-            elif has_cls and cnt == 0:
-                has_cls = False
-            return has_cls
-        return wrapper
-    return decorator
+from utils.imgproc import yolo_cls_buff
 
 @yolo_cls_buff(yolo_cls_buff_size)
 def check_has_person(pred_result):
@@ -47,15 +28,18 @@ def check_has_truck(pred_result):
     return id_truck in pred_result.boxes.cls
 
 
-def update_event_duration(context, event_id, if_happen):
+def update_event_duration(context, event_id, is_happen):
+    """
+    更新事件持续时间记录，返回事件持续时间
+    """
     event_key = f"event_start_time_{event_id}"
     if event_key not in context:
         context[event_key] = 0
 
     now_time = time.time()
-    if if_happen and context[event_key] == 0:
+    if is_happen and context[event_key] == 0:
         context[event_key] = now_time
-    elif not if_happen and context[event_key] != 0:
+    elif not is_happen and context[event_key] != 0:
         context[event_key] = 0
         return 0
 

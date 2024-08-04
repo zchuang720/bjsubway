@@ -11,7 +11,7 @@ from ultralytics import YOLO
 from ultralytics.engine.results import Boxes, Results
 
 sys.path.append("../../")
-import util
+import utils
 import data
 import models.pipe.data as pipe_data
 

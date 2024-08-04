@@ -11,8 +11,10 @@ from ultralytics import YOLO
 from ultralytics.engine.results import Boxes, Results
 from ultralytics.engine import predictor
 
+from utils.imgproc import yolo_cls_buff
+
 sys.path.append("../../")
-import util
+import utils
 import properties
 import models.fire.data as fire_data
 
@@ -35,22 +37,27 @@ def filter_outbounding_target(pred_result, polygon):
     pred_result.boxes = Boxes(filter_boxes, pred_result.orig_shape)
 
 
+@yolo_cls_buff(fire_data.yolo_cls_buff_size)
 def check_fire_state(pred_result):
     # 判断是否有动火人(2)
     return 2 in pred_result.boxes.cls
 
+@yolo_cls_buff(fire_data.yolo_cls_buff_size)
 def check_watcher_state(pred_result):
     # 判断是否有看火人(3)
     return 3 in pred_result.boxes.cls
 
+@yolo_cls_buff(fire_data.yolo_cls_buff_size)
 def check_fire_state(pred_result):
     # 判断是否动火，即是否有明火(4)
     return 4 in pred_result.boxes.cls
 
+@yolo_cls_buff(fire_data.yolo_cls_buff_size)
 def check_extinguisher_state(pred_result):
     # 判断是否有灭火器(5)
     return 5 in pred_result.boxes.cls
 
+@yolo_cls_buff(fire_data.yolo_cls_buff_size)
 def check_bucket_state(pred_result):
     # 判断是否有消防桶(6)
     return 6 in pred_result.boxes.cls
