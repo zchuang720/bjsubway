@@ -31,7 +31,6 @@ def tunnel_alarm(pred_result, context, **kwargs):
     alarm_event_id = []     # 警报事件编号
     post_time = time.time()
 
-    # TODO: 检测警报事件
     event_id = 999
     # 有开挖面
     if check_has_woking_face(refine_result):

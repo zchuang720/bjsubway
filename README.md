@@ -1,27 +1,67 @@
 # BJSubway
-
-## Introduction
-Briefly introduce the purpose and background of the project.
+城市轨道交通智慧工地视觉算法服务，来自北京市轨道交通公司
 
 ## Features
-List the key features and functions of the project.
-- Feature 1: [Describe feature 1]
-- Feature 2: [Describe feature 2]
-- Feature 3: [Describe feature 3]
+- 适用于事件识别和场景监测
+- 实时警报和视频推流
+- 精度与性能最优的目标检测和分割模型
+- 可靠、通用和易扩展的系统服务
+- 心跳机制的多进程监视和故障重启
+- 适配多种应用场景
 
-## Installation
-Provide step-by-step instructions on how to install the project.
-1. [Installation step 1]
-2. [Installation step 2]
-3. [Installation step 3]
+## 功能效果
+<details>
+<summary>点击展开/折叠</summary>
+
+### 已开发场景
+1. 动火场景
+![img](doc/img/fire.jpg)
+
+2. 明挖工程
+![img](doc/img/pipe.jpg)
+
+3. 暗挖工程
+![img](doc/img/tunnel.jpg)
+
+### 性能监控
+1. 内存使用
+![img](doc/img/mem.png)
+
+2. 处理帧率
+![img](doc/img/fps.jpg)
+
+</details>
+
+## 依赖
+Python package:
+- Python >= 3.8
+- OpenCV
+- Pytorch
+
+Software:
+- ffmpeg
+- EasyDarwin
+- NodeJS & npm
+
+## 安装
+```
+pip install -r requirements.txt
+```
 
 ## Usage
-Explain how to use the project with examples.
-1. [Usage example 1]
-2. [Usage example 2]
-
-## Dependencies
-List any external libraries or dependencies required for the project.
+1. 配置 properties.py 接入视频流地址和推流地址、第三方接入系统地址
+2. 启动主程序：
+    ```
+    python main.py
+    ```
+- 测试预测视频：
+```
+python pred_video.py
+```
+- 训练模型：
+```
+python train.py
+```
 
 <!-- ## Contributing
 Describe how others can contribute to the project. -->
@@ -29,8 +69,8 @@ Describe how others can contribute to the project. -->
 <!-- ## License
 Specify the license under which the project is distributed. -->
 
-## Authors
-623 Team of Beijing Jiaotong University.
+## 作者
+Team 623 of Beijing Jiaotong University.
 #### Contact: 13392406082@163.com
 
 <!-- ## Acknowledgements
