@@ -10,12 +10,12 @@ import multiprocessing
 
 def pred_video():
     context = {'post_data': {'name': '', 'equipmentId': '', }}
-    handler.video_alarm_handler(video_addr=r'resources\tunnel01.mp4',
+    handler.video_alarm_handler(video_addr=r'resources\tunnel03.mp4',
                                 model=r'weights\tunne-carl-l-seg-best.pt',
                                 alarm_func=tunnel_alarm, plot_func=tunnel_plot,
                                 interval=0.5, display=True, display_shape=0.5,
-                                save=False, loop=False, imgsz=640,
-                                monitor=True, context=context)
+                                save=True, loop=False, imgsz=640,
+                                context=context)
 
 
 def mp_test():

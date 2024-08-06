@@ -31,43 +31,36 @@ def tunnel_alarm(pred_result, context, **kwargs):
     alarm_event_id = []     # 警报事件编号
     post_time = time.time()
 
-    event_id = 999
     # 有开挖面
     if check_has_woking_face(refine_result):
         duration = update_event_duration(context, event_id=event_finish_dig, is_happen=True)
         # 挖面超过设定时间报警
         if duration > event_timeout[event_finish_dig]:
-            event_id = min(event_id, event_finish_dig)
             alarm_event_id.append(19)
     # 无开挖面
     else:
-        update_event_duration(context, event_id=event_finish_dig, is_happen=False)
-        event_id = min(event_id, event_doing_dig)
+        duration = update_event_duration(context, event_id=event_finish_dig, is_happen=False)
 
     # 有卡车->正在挖
     if check_has_truck(refine_result):
-        event_id = min(event_id, event_doing_dig)
-        update_event_duration(context, event_id=event_doing_dig, is_happen=False)
+        duration = update_event_duration(context, event_id=event_doing_dig, is_happen=False)
     # 无卡车
     else:
         duration = update_event_duration(context, event_id=event_doing_dig, is_happen=True)
-        # 小于 2 小时 (暂定)->没挖完
+        # 小于 x 小时 (暂定)->没挖完
         if duration < event_timeout[event_doing_dig]:
-            event_id = min(event_id, event_finish_dig)
-        # 大于 2 小时
+            pass
+        # 大于 x 小时
         else:
             # 有人->挖完了
             if check_has_person(refine_result):
-                event_id = min(event_id, event_stop_working)
-                update_event_duration(context, event_id=event_finish_dig, is_happen=False)
-            # 无人->停工了
-            else:
-                event_id = min(event_id, event_finish_dig)
                 duration = update_event_duration(context, event_id=event_finish_dig, is_happen=True)
                 # 大于 y 小时
                 if duration > event_timeout[event_finish_dig]:
-                    event_id = min(event_id, event_stop_working)
-                    alarm_event_id.append(18)
+                    alarm_event_id.append(20)
+            # 无人->停工了
+            else:
+                duration = update_event_duration(context, event_id=event_finish_dig, is_happen=False)
     
     # print([f"{key}: {context[key]}" for key in context if key.startswith("event")])
 
@@ -89,6 +82,8 @@ def tunnel_alarm(pred_result, context, **kwargs):
             pass
         if id == 19:
             display_info.append("未架设钢格栅")
+        if id == 20:
+            display_info.append("未架设钢格栅——车")
     
     ret["refine_result"] = refine_result
     ret["display_info"] = display_info

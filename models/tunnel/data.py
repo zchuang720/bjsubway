@@ -26,7 +26,7 @@ event_stop_working = 3
 
 event_timeout = {
     event_finish_dig: 2,
-    event_doing_dig: 2 * 1 * 2,
+    event_doing_dig: 2 * 1 * 1,
     event_stop_working: 2
 }
 
