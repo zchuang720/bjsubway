@@ -27,14 +27,14 @@ class Event (Enum):
     hasHole = auto()
     noHole = auto()
     hasCar = auto()
-    noCar_belowThresh = auto()
+    noCar = auto()
     noCar_aboveThresh_noPerson = auto()
     noCar_aboveThresh_hasPerson = auto()
 
 event_timeout = {
     Event.hasHole: 2,
-    Event.noCar_belowThresh: 2 * 1 * 1,
-    Event.noCar_aboveThresh_hasPerson: 2
+    Event.noCar: 2 * 1 * 1,
+    Event.noCar_aboveThresh_hasPerson: 1
 }
 
 

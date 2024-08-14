@@ -43,31 +43,35 @@ def tunnel_alarm(pred_result, context, **kwargs):
 
     # 事件2
     event_id2 = -1
+    event_id3 = -1
     # 有卡车->正在挖
     if check_has_truck(refine_result):
         event_id2 = Event.hasCar
     # 无卡车
     else:
+        event_id2 = Event.noCar
         # 小于 x 小时 (暂定)->没挖完
-        if get_event_duration(context, Event.noCar_belowThresh) < event_timeout[Event.noCar_belowThresh]:
-            event_id2 = Event.noCar_belowThresh
+        if get_event_duration(context, 2, Event.noCar) < event_timeout[Event.noCar]:
+            pass
         # 大于 x 小时
         else:
             # 有人->挖完了
             if check_has_person(refine_result):
-                event_id2 = Event.noCar_aboveThresh_hasPerson
+                event_id3 = Event.noCar_aboveThresh_hasPerson
             # 无人->停工了
             else:
-                event_id2 = Event.noCar_aboveThresh_noPerson
+                event_id3 = Event.noCar_aboveThresh_noPerson
     update_event_duration(context, 2, event_id2)
+    update_event_duration(context, 3, event_id3)
 
     if get_event_duration(context, 1, Event.hasHole) > event_timeout[Event.hasHole]:
         alarm_event_id.append(19)
-    if get_event_duration(context, 2, Event.noCar_aboveThresh_hasPerson) > event_timeout[Event.noCar_aboveThresh_hasPerson]:
+    if get_event_duration(context, 3, Event.noCar_aboveThresh_hasPerson) > event_timeout[Event.noCar_aboveThresh_hasPerson]:
         alarm_event_id.append(20)
-
     
-    # print([f"{key}: {context[key]}" for key in context if key.startswith("event")])
+    # print("event_id:", event_id1, event_id2, event_id3)
+    # print("event_duration:", get_event_duration(context, 1, Event.hasHole), get_event_duration(context, 3, Event.noCar_aboveThresh_hasPerson))
+    # print("alarm_event_id:", alarm_event_id)
 
 
     """
