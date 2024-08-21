@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no,viewport-fit=cover">
+   <script src="https://jsmpeg.com/jsmpeg.min.js" charset="utf-8"></script>
+   <title>Player</title>
+</head>
+<body>
+	<!-- <h3>Web Player</h3> -->
+   <!-- 在这里指定要创建和播放的视频数量 -->
+   <script>
+      var videoCount = 1;  // 可以根据需要更改视频数量
+      var port = '6102';
+      
+      // 视频流地址列表
+      var rtspList = [
+         'rtsp://123.125.19.139:554/fire/video1',
+         // 添加更多的 rtsp 地址
+      ];
+      
+      window.onload = () => {
+         for (var i = 0; i < videoCount; i++) {
+               // 创建 canvas 元素
+               var canvas = document.createElement('canvas');
+               canvas.id = 'canvas-' + (i + 1);
+               // canvas.style.width = '600px';
+               document.body.appendChild(canvas);
+               
+               // 创建并配置视频播放器
+               new JSMpeg.Player("ws://123.125.19.139:"+port+"/rtsp?url="+btoa(rtspList[i]), {
+                  canvas: canvas,
+               });
+               
+               console.log("ws://123.125.19.139:"+port+"/rtsp?url="+btoa(rtspList[i]));
+         }
+      };
+   </script>
+</body>
+</html>
