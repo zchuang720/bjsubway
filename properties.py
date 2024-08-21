@@ -51,9 +51,11 @@ grid_push_url_stress = [
 ]
 
 # network services
-access_ip = '123.125.19.139'
+access_ip_04 = '123.125.19.139'
+access_ip_03 = '111.198.54.249'
+
 # playback video url
-playback_url = f'http://{access_ip}:6101/video'
+playback_url = f'http://{access_ip_03}:6101/video'
 
 # post data
 md5_salt = 'jtgd2021ZT'
@@ -100,7 +102,7 @@ alarm_image_save_path = 'outs/alarm_images'
 playback_save_path = 'outs/playback'
 text_font_path = '/home/user/bjtu/bjsubway/resources/Deng.ttf'
 
-post_time_interval = {'fire': 60. * 10, 
+post_time_interval = {'fire': 6. * 10, 
                       'pipe': 60. * 60 * 8, 
                       'grid': 60. * 1, 
                       }

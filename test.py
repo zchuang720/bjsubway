@@ -322,8 +322,8 @@ def test_gongdi03_24_4_22():
         cam_ip = re.search(r'rtsp://\w+:\w+@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', cam_addr).group(1)
         push_addr = 'rtsp://localhost:556/tunnel/' + cam_ip
         context = {'post_data': {'name': cam_name, 'equipmentId': f'tunnel-{cam_ip}', 'brand': '久译'}}
-        alarm_func = [grid_alarm, grid_plot]
-        kwargs = {'video_addr': cam_addr, 'model': 'weights/tunne-carl-l-seg-best.pt', 
+        alarm_func = [fire_alarm, fire_plot]
+        kwargs = {'video_addr': cam_addr, 'model': 'weights/fire_size1280_0719.pt', 
                     'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 1., 
                     'display': True, 'display_shape': 0.6, 'infer_imgsz': 1280,
                     'push_stream': enable_push_stream, 'push_url': push_addr, 'push_shape':0.6, 

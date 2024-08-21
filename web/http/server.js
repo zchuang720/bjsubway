@@ -2,6 +2,13 @@ const http = require('http');
 const fs = require('fs');
 const url = require('url');
 const path = require('path');
+const { spawn } = require('child_process');
+
+// const serverIP = '123.125.19.139';   // 04
+const serverIP = '111.198.54.249';  // 03
+// const serverIP = '127.0.0.1';
+const srcPort = 556;
+const forwardPort = 6102;
 
 const server = http.createServer((req, res) => {
     // 记录时间日志
@@ -23,46 +30,41 @@ const server = http.createServer((req, res) => {
         if (rtspPath == 'all') {
             sendHtmlFile(res, 'allStream.html');
         } else {
-            sendHtmlResponse(res, generateRtspHtml(`rtsp://123.125.19.139:554/${rtspPath}`));
+            sendHtmlResponse(res, generateRtspHtml(`rtsp://localhost:${srcPort}/${rtspPath}`));
         }
     } else if (pathname.startsWith('/video/')) {
-        // 视频播放页面
         const videoFileName = pathname.replace('/video/', '');
-        const videoFilePath = path.join('../bjsubway/outs', videoFileName + '.mp4');
-
-        // Check if the video file exists
-        if (fs.existsSync(videoFilePath)) {
-            // Serve the video file
-            const stat = fs.statSync(videoFilePath);
-            const fileSize = stat.size;
-            const range = req.headers.range;
-      
-            if (range) {
-                // If the request contains the 'Range' header, serve partial content
-                const parts = range.replace(/bytes=/, "").split("-");
-                const start = parseInt(parts[0], 10);
-                const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-        
-                const chunksize = (end - start) + 1;
-                const file = fs.createReadStream(videoFilePath, { start, end });
-                const head = {
-                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-                    'Accept-Ranges': 'bytes',
-                    'Content-Length': chunksize,
-                    'Content-Type': 'video/mp4',
-                };
-        
-                res.writeHead(206, head);
-                file.pipe(res);
+        const originalVideoFilePath = path.join('../bjsubway/outs/playback', videoFileName + '.mp4');
+        const transcodedVideoFilePath = path.join('../bjsubway/outs/playback', videoFileName + '_transcoded.mp4');
+    
+        // Check if the original video file exists
+        if (fs.existsSync(originalVideoFilePath)) {
+            // Check if the transcoded video file exists
+            if (!fs.existsSync(transcodedVideoFilePath)) {
+                // Transcode the video to H.264
+                const ffmpeg = spawn('ffmpeg', [
+                    '-i', originalVideoFilePath,
+                    '-c:v', 'libx264',
+                    '-crf', '20',
+                    '-preset', 'fast',
+                    transcodedVideoFilePath
+                ]);
+    
+                ffmpeg.on('exit', (code) => {
+                    if (code === 0) {
+                        // Serve the transcoded video file
+                        serveVideo(res, transcodedVideoFilePath);
+                        // Delete the original video file
+                        // fs.unlinkSync(originalVideoFilePath);
+                    } else {
+                        // If transcoding fails, respond with a 500 error
+                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                        res.end('Internal Server Error');
+                    }
+                });
             } else {
-                // If the request doesn't contain the 'Range' header, serve the whole video
-                const head = {
-                    'Content-Length': fileSize,
-                    'Content-Type': 'video/mp4',
-                };
-        
-                res.writeHead(200, head);
-                fs.createReadStream(videoFilePath).pipe(res);
+                // Serve the existing transcoded video file
+                serveVideo(res, transcodedVideoFilePath);
             }
         } else {
             // If the video file doesn't exist, respond with a 404 error
@@ -77,9 +79,11 @@ const server = http.createServer((req, res) => {
 });
 
 // 设置服务器监听的端口
+// const IP = '172.17.104.72'
+const IP = '127.0.0.1';
 const PORT = 6101;
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`Server is running on http://${IP}:${PORT}`);
 });
 
 // 生成HTML页面
@@ -104,7 +108,7 @@ function generateRtspHtml(rtsp) {
         var rtsp = '${rtsp}'
         window.onload = () => {
             // 将rtsp视频流地址进行btoa处理一下
-            new JSMpeg.Player('ws://123.125.19.139:6102/rtsp?url=' + btoa(rtsp), {
+            new JSMpeg.Player('ws://${serverIP}:${forwardPort}/rtsp?url=' + btoa(rtsp), {
             canvas: document.getElementById('canvas-1')
             })
         }
@@ -156,4 +160,18 @@ function sendNotFound(res) {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.write('404 Not Found');
     res.end();
+}
+
+function serveVideo(res, filePath) {
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+
+    // If the request doesn't contain the 'Range' header, serve the whole video
+    const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+    };
+
+    res.writeHead(200, head);
+    fs.createReadStream(filePath).pipe(res);
 }
