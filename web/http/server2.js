@@ -6,7 +6,8 @@ const { spawn } = require('child_process');
 
 // const serverIP = '123.125.19.139';   // 04
 const serverIP = '111.198.54.249';  // 03
-const drawnPort = 556;
+// const serverIP = '127.0.0.1';
+const srcPort = 556;
 const forwardPort = 6102;
 
 const server = http.createServer((req, res) => {
@@ -29,7 +30,7 @@ const server = http.createServer((req, res) => {
         if (rtspPath == 'all') {
             sendHtmlFile(res, 'allStream.html');
         } else {
-            sendHtmlResponse(res, generateRtspHtml(`rtsp://${serverIP}:${drawnPort}/${rtspPath}`));
+            sendHtmlResponse(res, generateRtspHtml(`rtsp://localhost:${srcPort}/${rtspPath}`));
         }
     } else if (pathname.startsWith('/video/')) {
         const videoFileName = pathname.replace('/video/', '');
@@ -78,7 +79,8 @@ const server = http.createServer((req, res) => {
 });
 
 // 设置服务器监听的端口
-const IP = '172.17.104.72'
+// const IP = '172.17.104.72'
+const IP = '127.0.0.1';
 const PORT = 6101;
 server.listen(PORT, () => {
     console.log(`Server is running on http://${IP}:${PORT}`);

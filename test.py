@@ -20,9 +20,8 @@ import utils.net as net
 import properties
 import config
 from models.fire.alarm import fire_alarm, fire_plot
-import models.fire.alarm_2 as fire_2
 from models.grid.alarm import grid_alarm, grid_plot
-from models.pipe.alarm_2 import pipe_alarm, pipe_plot
+from models.pipe_ground.alarm import pipe_alarm, pipe_plot
 import handler
 
 
@@ -324,11 +323,11 @@ def test_gongdi03_24_4_22():
         push_addr = 'rtsp://localhost:556/tunnel/' + cam_ip
         context = {'post_data': {'name': cam_name, 'equipmentId': f'tunnel-{cam_ip}', 'brand': '久译'}}
         alarm_func = [grid_alarm, grid_plot]
-        kwargs = {'video_addr': cam_addr, 'model': 'weights/tunnel_seg_m_v1.pt', 
+        kwargs = {'video_addr': cam_addr, 'model': 'weights/tunne-carl-l-seg-best.pt', 
                     'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 1., 
                     'display': True, 'display_shape': 0.6, 'infer_imgsz': 1280,
                     'push_stream': enable_push_stream, 'push_url': push_addr, 'push_shape':0.6, 
-                    'loop': True, 'stream': False, 'monitor': False, 'playback': enable_playback, 
+                    'loop': True, 'stream': True, 'monitor': False, 'playback': enable_playback, 
                     'context': context, 'log_file': log_file, 'response_queue': response_queue}
         process = multiprocessing.Process(target=handler.video_alarm_handler, kwargs=kwargs)
         process.start()

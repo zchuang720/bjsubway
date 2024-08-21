@@ -15,7 +15,7 @@ import utils.net
 
 sys.path.append("../../")
 import utils
-import data
+import properties
 import models.fire.data as fire_data
 from models.fire.process_2 import *
 
@@ -81,7 +81,7 @@ def fire_alarm(pred_result, context, **kwargs):
             
         for id in alarm_event_id:
             if id not in context['post_alarm_event_id'] or \
-                        post_time - context['post_alarm_event_id'][id] > data.post_time_interval['fire']:
+                        post_time - context['post_alarm_event_id'][id] > properties.post_time_interval['fire']:
                 context['post_alarm_event_id'][id] = post_time
                 need_post = True
     
@@ -94,22 +94,22 @@ def fire_alarm(pred_result, context, **kwargs):
         # context['post_alarm_event_id'] = alarm_event_id
 
         alarm_image = fire_plot(pred_result.orig_img, ret)
-        cv2.imwrite(f"{data.alarm_image_save_path}/fire-{post_time}.jpg", alarm_image)
-        cv2.imwrite(f"{data.alarm_image_save_path}/fire-{post_time}_orig.jpg", pred_result.orig_img)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/fire-{post_time}.jpg", alarm_image)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/fire-{post_time}_orig.jpg", pred_result.orig_img)
 
-        post_data = copy.deepcopy(data.post_data_dict)
+        post_data = copy.deepcopy(properties.post_data_dict)
         post_data["equipment_type"] = "camera"
         post_data["event_type"] = "alarm"
 
-        camera_alarm_data = copy.deepcopy(data.camera_alarm_data_dict)
+        camera_alarm_data = copy.deepcopy(properties.camera_alarm_data_dict)
         camera_alarm_data["model"] = "2"
         camera_alarm_data["brand"] = "bjtu"
         camera_alarm_data["equipmentId"] = "fire_alarm_1"
         camera_alarm_data["alarmType"] = str(alarm_event_id[0])
-        camera_alarm_data["alarmUrl"] = f'{data.playback_url}/{post_time}'
+        camera_alarm_data["alarmUrl"] = f'{properties.playback_url}/{post_time}'
         camera_alarm_data["name"] = "Fire alarm 1"
         camera_alarm_data["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        camera_alarm_data["gongdiSN"] = data.gongdiSN
+        camera_alarm_data["gongdiSN"] = properties.gongdiSN
         camera_alarm_data["latitude"] = ""
         camera_alarm_data["longitude"] = ""
         camera_alarm_data["alarmInfo"] = ""
@@ -118,13 +118,13 @@ def fire_alarm(pred_result, context, **kwargs):
             camera_alarm_data.update(context['post_data'])
         camera_alarm_data["md5Check"] = utils.net.generate_md5_checksum(camera_alarm_data["equipmentId"] 
                                                                    + camera_alarm_data["time"] 
-                                                                   + camera_alarm_data["alarmType"] + data.md5_salt)
+                                                                   + camera_alarm_data["alarmType"] + properties.md5_salt)
         post_data["data"].append(camera_alarm_data)
         
         logger.info(f'📨 {post_data}')
         
         camera_alarm_data["alarmImage"] = utils.imgproc.image_to_base64(alarm_image, resize_f=1.)
-        utils.net.post(data.post_addr, post_data, logger=logger)
+        utils.net.post(properties.post_addr, post_data, logger=logger)
     
     return ret
 
