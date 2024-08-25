@@ -8,6 +8,9 @@ events:
     18.	暗挖未及时喷射混凝土
 """
 
+from enum import Enum, auto
+
+
 grid_alarm_result = {
     'refine_result': None,
     'display_info': None,
@@ -19,15 +22,19 @@ id_working_face = 1
 id_steel = 2
 id_truck = 3
 
-# 事件类型
-event_finish_dig = 1
-event_doing_dig = 2
-event_stop_working = 3
+class Event (Enum):
+    # 事件类型
+    hasHole = auto()
+    noHole = auto()
+    hasCar = auto()
+    noCar = auto()
+    noCar_aboveThresh_noPerson = auto()
+    noCar_aboveThresh_hasPerson = auto()
 
 event_timeout = {
-    event_finish_dig: 2,
-    event_doing_dig: 2 * 1 * 2,
-    event_stop_working: 2
+    Event.hasHole: 2,
+    Event.noCar: 2 * 1 * 1,
+    Event.noCar_aboveThresh_hasPerson: 1
 }
 
 

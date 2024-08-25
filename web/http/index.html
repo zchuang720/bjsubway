@@ -1,0 +1,273 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <script src="https://jsmpeg.com/jsmpeg.min.js" charset="utf-8"></script>
+    <style>
+        /* 设置整个页面的背景颜色为浅蓝色 */
+        body {
+            background-color: rgb(232, 232, 232);
+        }
+
+        /* 设置表格的样式 */
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 20px auto;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: lightblue;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: lightgray;
+        }
+
+        input[type=checkbox] {
+            transform: scale(1.5);
+        }
+
+        /* 设置按钮的样式 */
+        button {
+            display: block;
+            margin: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 2px 2px 5px gray;
+        }
+
+        /* 设置播放按钮的颜色为绿色 */
+        #play-button {
+            background-color: green;
+            color: white;
+        }
+
+        /* 设置全选/全不选按钮的颜色为黄色 */
+        #select-button {
+            background-color: lightgoldenrodyellow;
+            color: black;
+        }
+
+        /* 设置停止按钮的颜色为红色 */
+        #stop-button {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="display: flex; justify-content: center; align-items: center;">北交大推理视频流</h1>
+    <table id="video-table">
+        <thead>
+            <tr>
+                <th>视频流</th>
+                <th>选择</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 表格内容由JavaScript动态生成 -->
+        </tbody>
+    </table>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <button id="select-button">全选</button>
+        <button id="play-button">播放</button>
+        <button id="stop-button">停止</button>
+    </div>
+    <script>
+        // 定义一个变量，用于存储所有视频流地址，这里假设已经给出
+        var videoUrls = [
+            'rtsp://123.125.19.139:554/fire/video1',
+            'rtsp://123.125.19.139:554/fire/video2',
+            'rtsp://123.125.19.139:554/fire/video3',
+            'rtsp://123.125.19.139:554/fire/video4',
+            'rtsp://123.125.19.139:554/pipe/video1',
+            'rtsp://123.125.19.139:554/pipe/video2',
+            'rtsp://123.125.19.139:554/pipe/video3',
+            'rtsp://123.125.19.139:554/pipe/video4',
+            'rtsp://123.125.19.139:554/grid/video1',
+            'rtsp://123.125.19.139:554/grid/video2',
+            'rtsp://123.125.19.139:554/grid/video3',
+            'rtsp://123.125.19.139:554/grid/video4',
+        ];
+
+        // 定义一个全局变量，用于存储已经打开的视频流
+        var videoOpen = [];
+
+        // 定义一个函数，用于根据视频流地址数组生成表格内容
+        function generateTableContent(videoUrls) {
+            // 获取表格的tbody元素
+            var tbody = document.getElementById("video-table").tBodies[0];
+            // 清空tbody的内容
+            tbody.innerHTML = "";
+            // 遍历视频流地址数组，对每个元素进行处理
+            for (var i = 0; i < videoUrls.length; i++) {
+                // 获取当前元素，即一个视频流地址
+                var videoUrl = videoUrls[i];
+                // 创建一个tr元素，用于表示一行
+                var tr = document.createElement("tr");
+                // 创建一个td元素，用于表示视频流
+                var td1 = document.createElement("td");
+                // 设置td1的文本内容为视频流地址
+                td1.textContent = videoUrl;
+                // 将td1添加到tr中
+                tr.appendChild(td1);
+                // 创建一个td元素，用于表示选择
+                var td2 = document.createElement("td");
+                // 创建一个input元素，用于表示复选框
+                var input = document.createElement("input");
+                // 设置input的类型为checkbox
+                input.type = "checkbox";
+                // 设置input的值为视频流地址
+                input.value = videoUrl;
+                // 将input添加到td2中
+                td2.appendChild(input);
+                // 将td2添加到tr中
+                tr.appendChild(td2);
+                // 将tr添加到tbody中
+                tbody.appendChild(tr);
+            }
+        }
+
+        function openAndPlayVideoStream(videoUrl) {
+            // 创建 canvas 元素
+            var canvas = document.createElement('canvas');
+            canvas.id = 'canvas-' + videoUrl;
+            canvas.style.width = CSSMathMax(0.25, 1 / videoUrls.length) * 100 + '%';
+            document.body.appendChild(canvas);
+            
+            // 创建并配置视频播放器
+            new JSMpeg.Player("ws://123.125.19.139:6102/rtsp?url="+btoa(videoUrl), {
+                canvas: canvas,
+            });
+            
+            console.log("ws://123.125.19.139:6102/rtsp?url="+btoa(videoUrl));
+            return canvas
+        }
+
+        // 定义一个函数，用于播放选中的视频流
+        function playVideoStreams() {
+            stopVideoStreams();
+            // 获取表格的tbody元素
+            var tbody = document.getElementById("video-table").tBodies[0];
+            // 获取tbody中的所有input元素，即所有复选框
+            var inputs = tbody.getElementsByTagName("input");
+            checkedNum = 0;
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].checked) {
+                    checkedNum++;
+                }
+            }
+            // 遍历所有复选框，对每个复选框进行处理
+            for (var i = 0; i < inputs.length; i++) {
+                // 获取当前复选框
+                var input = inputs[i];
+                // 如果当前复选框被选中
+                if (input.checked) {
+                    // 获取当前复选框的值，即视频流地址
+                    var videoUrl = input.value;
+                    
+                    // 创建 canvas 元素
+                    var canvas = document.createElement('canvas');
+                    canvas.id = 'canvas-' + videoUrl;
+                    if (checkedNum > 1) {
+                        canvas.style.width = Math.max(0.25, 1.0 / checkedNum) * 100 + '%';
+                    }
+                    canvas.style.alignContent = 'center';
+                    document.body.appendChild(canvas);
+                    
+                    // 创建并配置视频播放器
+                    new JSMpeg.Player("ws://123.125.19.139:6102/rtsp?url="+btoa(videoUrl), {
+                        canvas: canvas,
+                    });
+                    
+                    console.log("ws://123.125.19.139:6102/rtsp?url="+btoa(videoUrl));
+                    // 将视频流添加到全局变量中，用于后续关闭
+                    videoOpen.push(canvas);
+                }
+            }
+        }
+
+        // 定义一个函数，用于停止所有已经打开的视频流
+        function stopVideoStreams() {
+            // 遍历全局变量中的所有视频流，对每个视频流进行处理
+            for (var i = 0; i < videoOpen.length; i++) {
+                // 获取当前视频流
+                var videoStream = videoOpen[i];
+                // 调用一个专门的函数，用于关闭视频流，这里先不具体实现
+                videoStream.remove();
+            }
+            // 清空全局变量中的视频流
+            videoOpen = [];
+        }
+
+        // 定义一个函数，用于全选或全不选表格中的复选框
+        function selectAllOrNone() {
+            // 获取表格的tbody元素
+            var tbody = document.getElementById("video-table").tBodies[0];
+            // 获取tbody中的所有input元素，即所有复选框
+            var inputs = tbody.getElementsByTagName("input");
+            // 定义一个变量，用于记录是否有未选中的复选框
+            var hasUnchecked = false;
+            // 遍历所有复选框，检查是否有未选中的
+            for (var i = 0; i < inputs.length; i++) {
+                // 获取当前复选框
+                var input = inputs[i];
+                // 如果当前复选框未选中
+                if (!input.checked) {
+                    // 将变量设为true，表示有未选中的复选框
+                    hasUnchecked = true;
+                    // 跳出循环，不需要继续检查
+                    break;
+                }
+            }
+            // 如果有未选中的复选框，说明需要全选
+            if (hasUnchecked) {
+                // 遍历所有复选框，将它们都选中
+                for (var i = 0; i < inputs.length; i++) {
+                    // 获取当前复选框
+                    var input = inputs[i];
+                    // 将当前复选框选中
+                    input.checked = true;
+                }
+            }
+            // 否则，说明需要全不选
+            else {
+                // 遍历所有复选框，将它们都取消选中
+                for (var i = 0; i < inputs.length; i++) {
+                    // 获取当前复选框
+                    var input = inputs[i];
+                    // 将当前复选框取消选中
+                    input.checked = false;
+                }
+            }
+        }
+
+        // 调用一个函数，用于根据视频流地址数组生成表格内容
+        generateTableContent(videoUrls);
+
+        // 获取播放按钮元素
+        var playButton = document.getElementById("play-button");
+        // 为播放按钮添加点击事件监听器，调用播放视频流的函数
+        playButton.addEventListener("click", playVideoStreams);
+
+        // 获取停止按钮元素
+        var stopButton = document.getElementById("stop-button");
+        // 为停止按钮添加点击事件监听器，调用停止视频流的函数
+        stopButton.addEventListener("click", stopVideoStreams);
+
+        // 获取全选/全不选按钮元素
+        var selectButton = document.getElementById("select-button");
+        // 为全选/全不选按钮添加点击事件监听器，调用全选或全不选的函数
+        selectButton.addEventListener("click", selectAllOrNone);
+    </script>
+</body>
+</html>

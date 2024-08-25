@@ -53,6 +53,8 @@ def fire_alarm(pred_result, context, **kwargs):
     fire_operator_state = check_fire_operator_state(refine_result)
     if fire_operator_state == -1:
         alarm_event_id.append(11)       # 11.违规动火-非特种工动火
+    elif fire_operator_state > 1 and 8 in alarm_event_id:
+        alarm_event_id.remove(8)        # 如果有多个动火人而没有看火人，则不报看火人脱岗
 
     # add process name
     if context['post_data']['name'] != "":

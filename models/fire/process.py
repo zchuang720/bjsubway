@@ -65,6 +65,22 @@ def check_bucket_state(pred_result):
 def calc_2_point_dist(p1, p2):
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
 
+def smoother(buff_size=3):
+    def _smoother(func):
+        buff = [0] * buff_size
+        ptr = 0
+        res = 0
+        def __smoother(*args, **kwargs):
+            nonlocal ptr, res
+            buff[ptr] = func(*args, **kwargs)
+            ptr = (ptr + 1) % buff_size
+            if len(set(buff)) == 1:
+                res = buff[0]
+            return res
+        return __smoother
+    return _smoother
+
+@smoother(buff_size=2)
 def check_fire_operator_state(pred_result):
     # 判断动火人与明火
     has_fire = check_fire_state(pred_result)
@@ -73,33 +89,35 @@ def check_fire_operator_state(pred_result):
         for i in range(len(pred_result.boxes.data)):
             if pred_result.boxes.data[i][-1] == 2:
                 pred_result.boxes.data[i][-1] = 1
+        return 0
+    
+    # 有动火，则计算动火人离明火的距离，小于阈值的标为的动火人
+    dist_threshold = pred_result.orig_shape[0] * fire_data.dist_fire_operator_threshold
+    true_operator_cnt = 0   # 有效动火人的数量
+    # 找到火源位置
+    fire_pos = []
+    for i in range(len(pred_result.boxes.data)):
+        if pred_result.boxes.data[i][-1] == 4:
+            xyxy = pred_result.boxes.data[i][0:4]
+            fire_pos.append(((xyxy[0] + xyxy[2]) / 2, (xyxy[1] + xyxy[3]) / 2))
+    # 遍历动火人计算距离
+    for i in range(len(pred_result.boxes.data)):
+        cls = pred_result.boxes.data[i][-1]
+        if cls == 2 or cls == 1:
+            xyxy = pred_result.boxes.data[i][0:4]
+            person_pos = ((xyxy[0] + xyxy[2]) / 2, (xyxy[1] + xyxy[3]) / 2)
+            for j in range(len(fire_pos)):
+                if calc_2_point_dist(person_pos, fire_pos[j]) < dist_threshold:
+                    pred_result.boxes.data[i][-1] = 2
+                    true_operator_cnt += 1
+                    break
+                else:
+                    pred_result.boxes.data[i][-1] = 1   # 大于阈值改为类别1(未动火)
+    # 如果没有有效动火人，则返回-1
+    if true_operator_cnt == 0:
+        return -1
     else:
-        # 有动火，则计算动火人离明火的距离，小于阈值的标为的动火人
-        dist_threshold = pred_result.orig_shape[0] * fire_data.dist_fire_operator_threshold
-        true_operator_cnt = 0   # 有效动火人的数量
-        # 找到火源位置
-        fire_pos = []
-        for i in range(len(pred_result.boxes.data)):
-            if pred_result.boxes.data[i][-1] == 4:
-                xyxy = pred_result.boxes.data[i][0:4]
-                fire_pos.append(((xyxy[0] + xyxy[2]) / 2, (xyxy[1] + xyxy[3]) / 2))
-        # 遍历动火人计算距离
-        for i in range(len(pred_result.boxes.data)):
-            cls = pred_result.boxes.data[i][-1]
-            if cls == 2 or cls == 1:
-                xyxy = pred_result.boxes.data[i][0:4]
-                person_pos = ((xyxy[0] + xyxy[2]) / 2, (xyxy[1] + xyxy[3]) / 2)
-                for j in range(len(fire_pos)):
-                    if calc_2_point_dist(person_pos, fire_pos[j]) < dist_threshold:
-                        pred_result.boxes.data[i][-1] = 2
-                        true_operator_cnt += 1
-                        break
-                    else:
-                        pred_result.boxes.data[i][-1] = 1   # 大于阈值改为类别1(未动火)
-        # 如果没有有效动火人，则返回-1
-        if true_operator_cnt == 0:
-            return -1
-    return 0
+        return true_operator_cnt
 
 def draw_text(img, text, left=0, top=0, textColor=(255, 255, 255), textSize=60):
     # 判断是否为opencv图片类型
@@ -115,4 +133,3 @@ def draw_text(img, text, left=0, top=0, textColor=(255, 255, 255), textSize=60):
         top += linewidth
 
     return np.asarray(img)
-

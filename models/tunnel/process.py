@@ -28,22 +28,46 @@ def check_has_truck(pred_result):
     return id_truck in pred_result.boxes.cls
 
 
-def update_event_duration(context, event_id, is_happen):
+def update_event_duration(context, exclusion_id, event_id):
     """
     更新事件持续时间记录，返回事件持续时间
+    key: event_id
+    value: event_start_time
+    return: event_duration = now_time - event_start_time
     """
-    event_key = f"event_start_time_{event_id}"
-    if event_key not in context:
-        context[event_key] = 0
+    exclusion_key = f"event_exclusion_{exclusion_id}"
+    if exclusion_key not in context:
+        context[exclusion_key] = {}
 
-    now_time = time.time()
-    if is_happen and context[event_key] == 0:
-        context[event_key] = now_time
-    elif not is_happen and context[event_key] != 0:
-        context[event_key] = 0
+    event_dict = context[exclusion_key]
+    if event_id not in event_dict:
+        event_dict[event_id] = 0
+
+    now = time.time()
+    for key in event_dict:
+        if key == event_id:
+            if event_dict[key] == 0:
+                event_dict[key] = now
+        else:
+            event_dict[key] = 0
+    
+    return now - event_dict[event_id]
+
+
+def get_event_duration(context, exclusion_id, event_id):
+    # 获取事件持续时间，未发生则返回 0
+    exclusion_key = f"event_exclusion_{exclusion_id}"
+    if exclusion_key not in context:
+        context[exclusion_key] = {}
+
+    event_dict = context[exclusion_key]
+    if event_id not in event_dict:
+        event_dict[event_id] = 0
+
+    if event_dict[event_id] == 0:
         return 0
-
-    return now_time - context[event_key]
+    else:
+        return time.time() - event_dict[event_id]
 
 
 def draw_text(img, text, left=0, top=0, textColor=(255, 255, 255), textSize=50):
