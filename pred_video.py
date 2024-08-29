@@ -2,10 +2,10 @@ import sys
 sys.path.append("..")
 import multiprocessing as mp
 import handler
-from models.fire.alarm import fire_alarm, fire_plot
-from models.grid.alarm import grid_alarm, grid_plot
-from models.pipe_ground.alarm import pipe_alarm, pipe_plot
-from models.tunnel.alarm import tunnel_alarm, tunnel_plot
+from internal.fire.alarm import fire_alarm, fire_plot
+from internal.grid.alarm import grid_alarm, grid_plot
+from internal.pipe_ground.alarm import pipe_alarm, pipe_plot
+from internal.tunnel.alarm import tunnel_alarm, tunnel_plot
 import multiprocessing
 
 def pred_video():

@@ -19,9 +19,9 @@ sys.path.append(".")
 import utils.net as net
 import properties
 import config
-from models.fire.alarm import fire_alarm, fire_plot
-from models.tunnel.alarm import tunnel_alarm, tunnel_plot
-from models.pipe_ground.alarm import pipe_alarm, pipe_plot
+from internal.fire.alarm import fire_alarm, fire_plot
+from internal.tunnel.alarm import tunnel_alarm, tunnel_plot
+from internal.pipe_ground.alarm import pipe_alarm, pipe_plot
 import handler
 
 

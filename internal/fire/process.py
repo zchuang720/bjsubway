@@ -16,7 +16,7 @@ from utils.imgproc import yolo_cls_buff
 sys.path.append("../../")
 import utils
 import properties
-import models.fire.data as fire_data
+import internal.fire.data as fire_data
 
 
 def filter_outbounding_target(pred_result, polygon):

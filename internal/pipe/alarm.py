@@ -15,9 +15,9 @@ import utils.net
 
 sys.path.append("../../")
 import utils
-import data
-import models.pipe.data as pipe_data
-from models.pipe.process_2 import *
+import properties
+import internal.pipe.data as pipe_data
+from internal.pipe.process import *
 
 
 def pipe_alarm(pred_result, context, **kwargs):
@@ -27,7 +27,7 @@ def pipe_alarm(pred_result, context, **kwargs):
     logger = logging.getLogger(context['logger_name'])
 
     # 修改标签类名(en => zh)
-    refine_result.names = pipe_data.translated_cls_name_2
+    refine_result.names = pipe_data.translated_cls_name
 
     # 边界坐标
     polygon = np.array(pipe_data.polygon_dict[proc_name]) if proc_name in pipe_data.polygon_dict else None
@@ -45,7 +45,7 @@ def pipe_alarm(pred_result, context, **kwargs):
     if polygon is not None:
         filter_outbounding_target(refine_result, polygon)
     
-    if check_anchor_state(refine_result) or check_uninstalled_pipe_state(refine_result):
+    if check_anchor_state(refine_result) or check_pipe_state(refine_result):
         alarm_event_id.append(4)    # 4.明挖支护-超时未支护
 
     # add process name
@@ -70,7 +70,7 @@ def pipe_alarm(pred_result, context, **kwargs):
             
         for id in alarm_event_id:
             if id not in context['post_alarm_event_id'] or \
-                        post_time - context['post_alarm_event_id'][id] > data.post_time_interval['pipe']:
+                        post_time - context['post_alarm_event_id'][id] > properties.post_time_interval['pipe']:
                 context['post_alarm_event_id'][id] = post_time
                 need_post = True
     
@@ -83,22 +83,22 @@ def pipe_alarm(pred_result, context, **kwargs):
         # context['post_alarm_event_id'] = alarm_event_id
 
         alarm_image = pipe_plot(pred_result.orig_img, ret)
-        cv2.imwrite(f"{data.alarm_image_save_path}/pipe-{post_time}.jpg", alarm_image)
-        cv2.imwrite(f"{data.alarm_image_save_path}/pipe-{post_time}_orig.jpg", pred_result.orig_img)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/pipe-{post_time}.jpg", alarm_image)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/pipe-{post_time}_orig.jpg", pred_result.orig_img)
 
-        post_data = copy.deepcopy(data.post_data_dict)
+        post_data = copy.deepcopy(properties.post_data_dict)
         post_data["equipment_type"] = "camera"
         post_data["event_type"] = "alarm"
 
-        camera_alarm_data = copy.deepcopy(data.camera_alarm_data_dict)
+        camera_alarm_data = copy.deepcopy(properties.camera_alarm_data_dict)
         camera_alarm_data["model"] = "2"
         camera_alarm_data["brand"] = "bjtu"
         camera_alarm_data["equipmentId"] = "pipe_alarm_1"
         camera_alarm_data["alarmType"] = str(alarm_event_id[0])
-        camera_alarm_data["alarmUrl"] = f'{data.playback_url}/{post_time}'
+        camera_alarm_data["alarmUrl"] = f'{properties.playback_url}/{post_time}'
         camera_alarm_data["name"] = "Pipe alarm 1"
         camera_alarm_data["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-        camera_alarm_data["gongdiSN"] = data.gongdiSN
+        camera_alarm_data["gongdiSN"] = properties.gongdiSN
         camera_alarm_data["latitude"] = ""
         camera_alarm_data["longitude"] = ""
         camera_alarm_data["alarmInfo"] = ""
@@ -107,13 +107,13 @@ def pipe_alarm(pred_result, context, **kwargs):
             camera_alarm_data.update(context['post_data'])
         camera_alarm_data["md5Check"] = utils.net.generate_md5_checksum(camera_alarm_data["equipmentId"] 
                                                                    + camera_alarm_data["time"] 
-                                                                   + camera_alarm_data["alarmType"] + data.md5_salt)
+                                                                   + camera_alarm_data["alarmType"] + properties.md5_salt)
         post_data["data"].append(camera_alarm_data)
         
         logger.info(f'📨 {post_data}')
 
         camera_alarm_data["alarmImage"] = utils.imgproc.image_to_base64(alarm_image, resize_f=1.)
-        utils.net.post(data.post_addr, post_data, logger=logger)
+        utils.net.post(properties.post_addr, post_data, logger=logger)
         
     return ret
 

@@ -4,7 +4,7 @@ import time
 from PIL import Image, ImageDraw, ImageFont
 
 import properties
-from models.tunnel.data import *
+from internal.tunnel.data import *
 from utils.imgproc import yolo_cls_buff
 
 @yolo_cls_buff(yolo_cls_buff_size)

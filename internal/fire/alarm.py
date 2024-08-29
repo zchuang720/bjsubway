@@ -15,88 +15,65 @@ import utils.imgproc
 sys.path.append("../../")
 import utils
 import properties
-import  models.tunnel.data as tunnel_data
-from models.tunnel.process import *
+import internal.fire.data as fire_data
+from internal.fire.process import *
 
 
-def tunnel_alarm(pred_result, context, **kwargs):
-    ret = deepcopy(tunnel_data.grid_alarm_result)
+def fire_alarm(pred_result, context, **kwargs):
+    proc_name = mp.current_process().name
+    ret = deepcopy(fire_data.fire_alarm_result)
     refine_result = deepcopy(pred_result)
     logger = logging.getLogger(context['logger_name'])
+    
+    refine_result.names = fire_data.translated_cls_name
 
-    # 修改标签类名(en => zh)
-    refine_result.names = tunnel_data.translated_cls_name
+    # 边界坐标
+    polygon = np.array(fire_data.polygon_dict[proc_name]) if proc_name in fire_data.polygon_dict else None
+    if polygon is not None:
+        for i in range(len(polygon)):
+            polygon[i][0] = polygon[i][0] * pred_result.orig_shape[1]
+            polygon[i][1] = polygon[i][1] * pred_result.orig_shape[0]
+        polygon.astype(np.int32)
 
     display_info = []       # 画面左上角警报信息
     alarm_event_id = []     # 警报事件编号
     post_time = time.time()
 
-    # 事件1
-    event_id1 = -1
-    # 有开挖面
-    if check_has_woking_face(refine_result):
-        event_id1 = Event.hasHole
-    # 无开挖面
-    else:
-        event_id1 = Event.noHole
-    update_event_duration(context, 1, event_id1)
-
-    # 事件2
-    event_id2 = -1
-    event_id3 = -1
-    # 有卡车->正在挖
-    if check_has_truck(refine_result):
-        event_id2 = Event.hasCar
-    # 无卡车
-    else:
-        event_id2 = Event.noCar
-        # 小于 x 小时 (暂定)->没挖完
-        if get_event_duration(context, 2, Event.noCar) < event_timeout[Event.noCar]:
-            pass
-        # 大于 x 小时
-        else:
-            # 有人->挖完了
-            if check_has_person(refine_result):
-                event_id3 = Event.noCar_aboveThresh_hasPerson
-            # 无人->停工了
-            else:
-                event_id3 = Event.noCar_aboveThresh_noPerson
-    update_event_duration(context, 2, event_id2)
-    update_event_duration(context, 3, event_id3)
-
-    if get_event_duration(context, 1, Event.hasHole) > event_timeout[Event.hasHole]:
-        alarm_event_id.append(19)
-    if get_event_duration(context, 3, Event.noCar_aboveThresh_hasPerson) > event_timeout[Event.noCar_aboveThresh_hasPerson]:
-        alarm_event_id.append(20)
+    # 检测警报事件
+    if polygon is not None:
+        filter_outbounding_target(refine_result, polygon)
     
-    # print("event_id:", event_id1, event_id2, event_id3)
-    # print("event_duration:", get_event_duration(context, 1, Event.hasHole), get_event_duration(context, 3, Event.noCar_aboveThresh_hasPerson))
-    # print("alarm_event_id:", alarm_event_id)
-
-
-    """
-    if check_steel_state(refine_result):
-        alarm_event_id.append(18)   # 18.暗挖未及时喷射混凝土
-    if check_woking_face_state(refine_result):
-        alarm_event_id.append(19)   # 19.暗挖未及时架设钢支撑（待定）
+    has_fire = check_fire_state(refine_result)
+    if has_fire:
+        if not check_watcher_state(refine_result):
+            alarm_event_id.append(8)    # 8.违规动火-看火人脱岗
+        if not check_extinguisher_state(refine_result) and not check_bucket_state(refine_result):
+            alarm_event_id.append(9)    # 9.违规动火-周边未配备消防器材
+    
+    fire_operator_state = check_fire_operator_state(refine_result)
+    if fire_operator_state == -1:
+        alarm_event_id.append(11)       # 11.违规动火-非特种工动火
+    elif fire_operator_state > 1 and 8 in alarm_event_id:
+        alarm_event_id.remove(8)        # 如果有多个动火人而没有看火人，则不报看火人脱岗
 
     # add process name
-    display_info.insert(0, f"{context['post_data']['name'].split('-')[-1]}路")
-    """
+    if context['post_data']['name'] != "":
+        display_info.insert(0, f"{context['post_data']['name'].split('-')[-1]}路")
 
     # 生成左上角警报信息
     for id in alarm_event_id:
-        if id == 18:
-            # display_info.append("未喷射混凝土")
-            pass
-        if id == 19:
-            display_info.append("未架设钢格栅")
-        if id == 20:
-            display_info.append("未架设钢格栅——无车")
+        if id == 8:
+            display_info.append("看火人脱岗")
+        elif id == 9:
+            display_info.append("周边未配备消防器材")
+        elif id == 11:
+            display_info.append("非特种工动火")
     
     ret["refine_result"] = refine_result
     ret["display_info"] = display_info
     ret["need_post"] = False
+    if polygon is not None:
+        ret["polygon"] = polygon
 
     # 发送警报post
     need_post = False
@@ -106,7 +83,7 @@ def tunnel_alarm(pred_result, context, **kwargs):
             
         for id in alarm_event_id:
             if id not in context['post_alarm_event_id'] or \
-                        post_time - context['post_alarm_event_id'][id] > properties.post_time_interval['tunnel']:
+                        post_time - context['post_alarm_event_id'][id] > properties.post_time_interval['fire']:
                 context['post_alarm_event_id'][id] = post_time
                 need_post = True
     
@@ -118,9 +95,9 @@ def tunnel_alarm(pred_result, context, **kwargs):
         context['post_time'] = post_time
         # context['post_alarm_event_id'] = alarm_event_id
 
-        alarm_image = tunnel_plot(pred_result.orig_img, ret)
-        cv2.imwrite(f"{properties.alarm_image_save_path}/tunnel-{post_time}.jpg", alarm_image)
-        cv2.imwrite(f"{properties.alarm_image_save_path}/tunnel-{post_time}_orig.jpg", pred_result.orig_img)
+        alarm_image = fire_plot(pred_result.orig_img, ret)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/fire-{post_time}.jpg", alarm_image)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/fire-{post_time}_orig.jpg", pred_result.orig_img)
 
         post_data = copy.deepcopy(properties.post_data_dict)
         post_data["equipment_type"] = "camera"
@@ -128,11 +105,11 @@ def tunnel_alarm(pred_result, context, **kwargs):
 
         camera_alarm_data = copy.deepcopy(properties.camera_alarm_data_dict)
         camera_alarm_data["model"] = "2"
-        camera_alarm_data["brand"] = "brand"
-        camera_alarm_data["equipmentId"] = "equipmentId"
+        camera_alarm_data["brand"] = "bjtu"
+        camera_alarm_data["equipmentId"] = "fire_alarm_1"
         camera_alarm_data["alarmType"] = str(alarm_event_id[0])
         camera_alarm_data["alarmUrl"] = f'{properties.playback_url}/{post_time}'
-        camera_alarm_data["name"] = "name"
+        camera_alarm_data["name"] = "Fire alarm 1"
         camera_alarm_data["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
         camera_alarm_data["gongdiSN"] = properties.gongdiSN
         camera_alarm_data["latitude"] = ""
@@ -147,23 +124,31 @@ def tunnel_alarm(pred_result, context, **kwargs):
         post_data["data"].append(camera_alarm_data)
         
         logger.info(f'📨 {post_data}')
-
+        
         camera_alarm_data["alarmImage"] = utils.imgproc.image_to_base64(alarm_image, resize_f=1.)
         utils.net.post(properties.post_addr, post_data, logger=logger)
-
+    
     return ret
 
 
-def tunnel_plot(img, alarm_result, **kwargs):
+def fire_plot(img, alarm_result, **kwargs):
+    # used_times = [('plot_start', time.time())]
     img_ret = deepcopy(img)
+    # used_times.append(('copy', time.time()))
     # 画边界框
-    if 'polygon' in alarm_result:
+    if 'polygon' in alarm_result and alarm_result['polygon'] is not None:
         img_ret = cv2.polylines(img_ret, [alarm_result['polygon'].astype(np.int32)], isClosed=True, color=(255,0,0), thickness=3)
+    # used_times.append(('polygon', time.time()))
     # 画目标框
     if 'refine_result' in alarm_result:
         img_ret = alarm_result['refine_result'].plot(img=img_ret, conf=False)
-        # boxes = alarm_result['refine_result'].boxes.xyxy.cpu().numpy().astype(np.int32)
+    # used_times.append(('yolo', time.time()))
     # 画警报信息
     if 'display_info' in alarm_result:
         img_ret = draw_text(img_ret, alarm_result['display_info'])
+    # used_times.append(('text', time.time()))
+    # used_time_info = f'total={used_times[-1][1] - used_times[0][1]:.3f} '
+    # for i in range(1, len(used_times)):
+    #     used_time_info += f'{used_times[i][0]}={used_times[i][1] - used_times[i-1][1]:.3f} '
+    # print(used_time_info)
     return img_ret

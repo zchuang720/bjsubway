@@ -15,7 +15,7 @@ from ultralytics.engine.results import Boxes, Results
 sys.path.append("../../")
 import utils
 import properties
-from models.pipe_ground.data import *
+from internal.pipe_ground.data import *
 
 
 def filter_outbounding_target(pred_result, polygon):
