@@ -32,9 +32,9 @@ class Event (Enum):
     noCar_aboveThresh_hasPerson = auto()
 
 event_timeout = {
-    Event.hasHole: 2,
-    Event.noCar: 2 * 1 * 1,
-    Event.noCar_aboveThresh_hasPerson: 1
+    Event.hasHole: 60,
+    Event.noCar: 30 * 1 * 1,
+    Event.noCar_aboveThresh_hasPerson: 30
 }
 
 

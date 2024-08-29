@@ -10,11 +10,11 @@ import multiprocessing
 
 def pred_video():
     context = {'post_data': {'name': '', 'equipmentId': '', }}
-    handler.video_alarm_handler(video_addr=r'resources/new_fire_underground.mp4',
-                                model=r'weights/fire_size1280_0719.pt',
-                                alarm_func=fire_alarm, plot_func=fire_plot,
-                                interval=0.2, display=True, display_shape=0.5,
-                                save=True, loop=False, imgsz=1280,
+    handler.video_alarm_handler(video_addr=r'resources/tunnel-0824.mp4',
+                                model=r'weights/tunnel-seg-l-1280-0828.pt',
+                                alarm_func=tunnel_alarm, plot_func=tunnel_plot,
+                                interval=0.1, display=True, display_shape=0.5,
+                                save=False, loop=False, imgsz=1280,
                                 context=context)
 
 

@@ -160,10 +160,12 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
             # 目标检测
             if curr_loop_time - context['prev_detect_time'] > interval:
                 laplacian_fuzzy = False
-                # laplacian_fuzzy = utils.imgproc.variance_of_laplacian(cv2.resize(frame, (0,0), fx=0.3, fy=0.3))
-                # laplacian_fuzzy = laplacian_fuzzy < config.laplacian_threshold
-                # if laplacian_fuzzy:
-                #     logger.info('laplacian fuzzy')
+                laplacian_fuzzy = utils.imgproc.variance_of_laplacian(cv2.resize(frame, (0,0), fx=0.5, fy=0.5))
+                if laplacian_fuzzy < config.laplacian_threshold:
+                    print(f'laplacian fuzzy value: {laplacian_fuzzy}')
+                    laplacian_fuzzy = True
+                else:
+                    laplacian_fuzzy = False
                 
                 if not laplacian_fuzzy:
                     context['prev_detect_time'] = curr_loop_time

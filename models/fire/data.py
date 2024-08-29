@@ -32,7 +32,7 @@ translated_cls_name = {
   6: "消防桶"   ,           # 棕红色桶
 }
 
-dist_fire_operator_threshold = 0.9
+dist_fire_operator_threshold = 0.3
 bounding_dist_threshold = 0.1
 
 polygon_dict = {

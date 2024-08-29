@@ -106,7 +106,7 @@ def tunnel_alarm(pred_result, context, **kwargs):
             
         for id in alarm_event_id:
             if id not in context['post_alarm_event_id'] or \
-                        post_time - context['post_alarm_event_id'][id] > properties.post_time_interval['grid']:
+                        post_time - context['post_alarm_event_id'][id] > properties.post_time_interval['tunnel']:
                 context['post_alarm_event_id'][id] = post_time
                 need_post = True
     
@@ -119,7 +119,8 @@ def tunnel_alarm(pred_result, context, **kwargs):
         # context['post_alarm_event_id'] = alarm_event_id
 
         alarm_image = tunnel_plot(pred_result.orig_img, ret)
-        cv2.imwrite(f"{properties.alarm_image_save_path}/pipe-{post_time}.jpg", alarm_image)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/tunnel-{post_time}.jpg", alarm_image)
+        cv2.imwrite(f"{properties.alarm_image_save_path}/tunnel-{post_time}_orig.jpg", pred_result.orig_img)
 
         post_data = copy.deepcopy(properties.post_data_dict)
         post_data["equipment_type"] = "camera"
