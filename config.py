@@ -14,4 +14,4 @@ alarm_image_save_path = 'outs/alarm_images'
 text_font_path = 'resources/fonts/Arial.Unicode.ttf'
 
 # image fuzzy threshold
-laplacian_threshold = 2500
+laplacian_threshold = 1200

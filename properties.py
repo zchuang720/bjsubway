@@ -7,11 +7,13 @@
 post_addr_04 = 'http://172.17.104.99:8099/device-front/log'
 gongdiSN_04 = '13040224'
 # 03
-post_addr_03 = 'http://111.198.54.249:6203/device-front/log'
+# post_addr_03 = 'http://111.198.54.249:6203/device-front/log'
+post_addr_03 = 'https://zhgd.beijingmcc.com:3001/eqlog/log'
+gongdiSN_03 = '13-03'
 
 # real
-post_addr = post_addr_04
-gongdiSN = gongdiSN_04
+post_addr = post_addr_03
+gongdiSN = gongdiSN_03
 
 # cam rtsp address
 pipe_cam_addr_stress = [f'./resources/stress_test/{i}.mp4' for i in range(1, 25)]
@@ -30,6 +32,7 @@ gongdi04_cam_addr = {
 
 gongdi03_cam_addr = {
     'B-021': 'rtsp://admin:qwe12345@192.101.3.110/cam/realmonitor?channel=1&subtype=0',
+    'A-024': 'rtsp://admin:qwe12345@192.101.3.132/cam/realmonitor?channel=1&subtype=0',
 }
 
 # push stream address
@@ -102,7 +105,7 @@ alarm_image_save_path = 'outs/alarm_images'
 playback_save_path = 'outs/playback'
 text_font_path = '/home/user/bjtu/bjsubway/resources/Deng.ttf'
 
-post_time_interval = {'fire': 6. * 10, 
+post_time_interval = {'fire': 60. * 1, 
                       'pipe': 60. * 60 * 8, 
-                      'grid': 60. * 1, 
+                      'tunnel': 60. * 3, 
                       }

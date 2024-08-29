@@ -19,9 +19,9 @@ sys.path.append(".")
 import utils.net as net
 import properties
 import config
-from models.fire.alarm import fire_alarm, fire_plot
-from models.grid.alarm import grid_alarm, grid_plot
-from models.pipe_ground.alarm import pipe_alarm, pipe_plot
+from internal.fire.alarm import fire_alarm, fire_plot
+from internal.tunnel.alarm import tunnel_alarm, tunnel_plot
+from internal.pipe_ground.alarm import pipe_alarm, pipe_plot
 import handler
 
 
@@ -315,16 +315,33 @@ def test_gongdi03_24_4_22():
     
     enable_push_stream = True
     enable_playback = False
+    # fire-tunnel
+    cam_names = ['A-024']
+    for cam_name in cam_names:
+        cam_addr = properties.gongdi03_cam_addr[cam_name]
+        cam_ip = re.search(r'rtsp://\w+:\w+@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', cam_addr).group(1)
+        push_addr = 'rtsp://localhost:556/fire/' + cam_ip
+        context = {'post_data': {'name': cam_name, 'equipmentId': f'fire-{cam_ip}', 'brand': '久译'}}
+        alarm_func = [fire_alarm, fire_plot]
+        kwargs = {'video_addr': cam_addr, 'model': 'weights/fire-tunnel-det-l-1280-0828.pt', 
+                    'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 0.1, 
+                    'display': True, 'display_shape': 0.6, 'infer_imgsz': 1280,
+                    'push_stream': enable_push_stream, 'push_url': push_addr, 'push_shape':0.6, 
+                    'loop': True, 'stream': True, 'monitor': False, 'playback': enable_playback, 
+                    'context': context, 'log_file': log_file, 'response_queue': response_queue}
+        process = multiprocessing.Process(target=handler.video_alarm_handler, kwargs=kwargs)
+        process.start()
+        proc_status[process.pid] = {'object': process, 'kwargs': kwargs, 'timestamp': time.time(), 'code': None, 'msg': ''}
     # tunnel
-    cam_names = ['B-021']
+    cam_names = ['A-024']
     for cam_name in cam_names:
         cam_addr = properties.gongdi03_cam_addr[cam_name]
         cam_ip = re.search(r'rtsp://\w+:\w+@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', cam_addr).group(1)
         push_addr = 'rtsp://localhost:556/tunnel/' + cam_ip
         context = {'post_data': {'name': cam_name, 'equipmentId': f'tunnel-{cam_ip}', 'brand': '久译'}}
-        alarm_func = [fire_alarm, fire_plot]
-        kwargs = {'video_addr': cam_addr, 'model': 'weights/fire_size1280_0719.pt', 
-                    'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 1., 
+        alarm_func = [tunnel_alarm, tunnel_plot]
+        kwargs = {'video_addr': cam_addr, 'model': 'weights/tunnel-seg-l-1280-0828.pt', 
+                    'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 0.1, 
                     'display': True, 'display_shape': 0.6, 'infer_imgsz': 1280,
                     'push_stream': enable_push_stream, 'push_url': push_addr, 'push_shape':0.6, 
                     'loop': True, 'stream': True, 'monitor': False, 'playback': enable_playback, 

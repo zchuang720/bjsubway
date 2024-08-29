@@ -13,9 +13,9 @@ import utils.net as net
 import handler
 import properties
 import test
-from models.fire.alarm import fire_alarm, fire_plot
-from models.grid.alarm import grid_alarm, grid_plot
-from models.pipe.alarm import pipe_alarm, pipe_plot
+from internal.fire.alarm import fire_alarm, fire_plot
+from internal.grid.alarm import grid_alarm, grid_plot
+from internal.pipe.alarm import pipe_alarm, pipe_plot
 
 
 def main():
