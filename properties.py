@@ -35,6 +35,12 @@ gongdi03_cam_addr = {
     'A-024': 'rtsp://admin:qwe12345@192.101.3.132/cam/realmonitor?channel=1&subtype=0',
 }
 
+gongdi07_cam_addr = {
+    '回龙观-017': 'rtsp://admin:abcd1234@192.101.7.100/cam/realmonitor?channel=1&subtype=0',
+    '回龙观-016': 'rtsp://admin:abcd1234@192.101.7.105/cam/realmonitor?channel=1&subtype=0',
+    '回龙观-020': 'rtsp://admin:abcd1234@192.101.7.106/cam/realmonitor?channel=1&subtype=0',
+}
+
 # push stream address
 pipe_push_url = [
     'rtsp://localhost/pipe/video1',

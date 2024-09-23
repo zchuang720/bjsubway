@@ -1,8 +1,9 @@
 # env and run file
 vscode/
-runs/
+runs/**/*
+logs/**/*
+outs/**/*
 weights/archives/
-logs/
 *.out
 
 # media file
@@ -15,6 +16,7 @@ logs/
 # archive file
 *.zip
 *.tar
+*.pt
 
 # doc
 !doc/**/*
