@@ -117,7 +117,7 @@ def tunnel_alarm(pred_result, context, **kwargs):
         if id == 20:
             display_info.append("未架设钢格栅(无车)")
         if id == 21:
-            display_info.append("未架设钢格栅(无人)")
+            display_info.append("未架设钢格栅(长时间作业)")
     
     ret["refine_result"] = refine_result
     ret["display_info"] = display_info
@@ -186,7 +186,7 @@ def tunnel_plot(img, alarm_result, **kwargs):
         img_ret = cv2.polylines(img_ret, [alarm_result['polygon'].astype(np.int32)], isClosed=True, color=(255,0,0), thickness=3)
     # 画目标框
     if 'refine_result' in alarm_result:
-        img_ret = alarm_result['refine_result'].plot(img=img_ret, conf=False)
+        img_ret = alarm_result['refine_result'].plot(img=img_ret, conf=True)
         # boxes = alarm_result['refine_result'].boxes.xyxy.cpu().numpy().astype(np.int32)
     # 画警报信息
     if 'display_info' in alarm_result:
