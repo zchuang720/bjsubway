@@ -38,29 +38,33 @@ def filter_outbounding_target(pred_result, polygon):
 
 
 @yolo_cls_buff(fire_data.yolo_cls_buff_size)
-def check_fire_state(pred_result):
+def check_has_operator(pred_result):
     # 判断是否有动火人(2)
     return 2 in pred_result.boxes.cls
 
 @yolo_cls_buff(fire_data.yolo_cls_buff_size)
-def check_watcher_state(pred_result):
+def check_has_watcher(pred_result):
     # 判断是否有看火人(3)
     return 3 in pred_result.boxes.cls
 
 @yolo_cls_buff(fire_data.yolo_cls_buff_size)
-def check_fire_state(pred_result):
+def check_has_fire(pred_result):
     # 判断是否动火，即是否有明火(4)
     return 4 in pred_result.boxes.cls
 
 @yolo_cls_buff(fire_data.yolo_cls_buff_size)
-def check_extinguisher_state(pred_result):
+def check_has_extinguisher(pred_result):
     # 判断是否有灭火器(5)
     return 5 in pred_result.boxes.cls
 
 @yolo_cls_buff(fire_data.yolo_cls_buff_size)
-def check_bucket_state(pred_result):
+def check_has_bucket(pred_result):
     # 判断是否有消防桶(6)
     return 6 in pred_result.boxes.cls
+
+def assert_has_fire(pred_result):
+    # 判断是否有明火(4), 不走缓冲
+    return 4 in pred_result.boxes.cls
 
 def calc_2_point_dist(p1, p2):
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
@@ -81,9 +85,7 @@ def smoother(buff_size=3):
     return _smoother
 
 @smoother(buff_size=2)
-def check_fire_operator_state(pred_result):
-    # 判断动火人与明火
-    has_fire = check_fire_state(pred_result)
+def check_fire_operator_state(pred_result, has_fire):
     if not has_fire:
         # 没有动火，则把类别2的动火人(正在动火)改为类别1(未动火)
         for i in range(len(pred_result.boxes.data)):
