@@ -37,7 +37,7 @@ class Event (Enum):
 
 
 event_timeout = {
-    Event.hasHole: 1*60,
+    Event.hasHole: 5,
     Event.noCar: 30 * 1 * 1,
     Event.noCar_aboveThresh_hasPerson: 30,
     Event.noSteel: 60,

@@ -13,6 +13,7 @@ import multiprocessing as mp
 import logging
 import random
 import traceback
+from tqdm import tqdm
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 from memory_profiler import memory_usage
@@ -128,6 +129,11 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
     # FPS
     if monitor:
         monitor = FpsMonitor(window_size=60, flash_interval=2.)
+
+    # 进度条
+    pbar = tqdm(desc='Inference', unit='frame')
+    if not stream:
+        pbar.total = frame_num
     
     # 初始化计时
     context['prev_detect_time'] = 0
@@ -239,6 +245,7 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
                                     'code': 0, 'msg': 'ok', })
 
             frame_cnt = (frame_cnt + 1) % config.MAXINT
+            pbar.update(1)
 
             # used-time statistics
             if curr_loop_time == context['prev_detect_time'] and curr_loop_time - context['prev_used_time'] > config.used_time_stats_interval:
