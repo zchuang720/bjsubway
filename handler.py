@@ -31,6 +31,43 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
                         alarm_func=None, plot_func=None, 
                         display:bool=False, save:bool=False, push_stream:bool=False, playback:bool=False,
                         response_queue:mp.Queue=None, **kwargs):
+    """
+    视频报警处理函数，用于处理视频流并进行目标检测和报警。
+
+    参数:
+    - video_addr (str): 视频文件路径或视频流地址。
+    - model: 目标检测模型。
+    - interval (float, optional): 目标检测间隔时间，单位为秒。默认为1.0秒。
+    - alarm_func (callable, optional): 报警函数，用于处理检测结果并生成报警信息。默认为None。
+    - plot_func (callable, optional): 绘图函数，用于在视频帧上绘制检测结果。默认为None。
+    - display (bool, optional): 是否显示视频帧。默认为False。
+    - save (bool, optional): 是否保存视频帧。默认为False。
+    - push_stream (bool, optional): 是否推送视频流。默认为False。
+    - playback (bool, optional): 是否进行回放处理。默认为False。
+    - response_queue (mp.Queue, optional): 响应队列，用于存储处理结果。默认为None。
+    - **kwargs: 其他关键字参数。
+
+    kwarg 参数:
+    - stream (bool, optional): 是否使用流视频读取器。默认为False。
+    - context (dict, optional): 任务上下文数据。默认为空字典。
+    - monitor (bool, optional): 是否启用FPS监控。默认为False。
+    - device (str, optional): 目标检测模型的设备。默认为'cuda:0'。
+    - imgsz (int, optional): 目标检测模型的输入图像大小。默认为640。
+    - log_file (str, optional): 日志文件路径。默认为None。
+    - loop (bool, optional): 是否循环播放视频。默认为False。
+    - display_shape (float, optional): 显示视频帧的缩放比例。默认为1.0。
+    - save_path (str, optional): 保存视频帧的路径。默认为'./runs/当前时间.mp4'。
+    - save_shape (float, optional): 保存视频帧的缩放比例。默认为1.0。
+    - push_url (str, optional): 推送视频流的URL。默认为None。
+    - push_shape (float, optional): 推送视频流的缩放比例。默认为1.0。
+    - playback_resize_f (float, optional): 回放处理的缩放比例。默认为0.5。
+    - trace_time (float, optional): 回放处理的跟踪时间。默认为60.0秒。
+    - gc_interval (float, optional): 垃圾回收间隔时间，单位为秒。默认为config.gc_interval。
+    - used_time_stats_interval (float, optional): 使用时间统计间隔时间，单位为秒。默认为config.used_time_stats_interval。
+
+    返回:
+    无
+    """
     # config
     stream = kwargs['stream'] if 'stream' in kwargs else False      # to use stream video reader
     context = kwargs['context'] if 'context' in kwargs else {}      # to store task context data
@@ -309,6 +346,27 @@ def keep_proc_alive(response_queue:mp.Queue, proc_status:dict, logger:logging.Lo
     - logger: an instance of logging.Logger
     
     No return value, runs indefinitely until interrupted
+
+    Usage:
+
+    # 心跳通道
+    response_queue = multiprocessing.Queue()
+    # 进程状态
+    proc_status = {}
+    
+    # 进程参数包含心跳通道
+    kwargs = { ... , 'response_queue': response_queue}
+    process = multiprocessing.Process(target=handler.video_alarm_handler, kwargs=kwargs)
+    # 启动进程
+    process.start()
+    # 记录进程信息
+    proc_status[process.pid] = {'object': process, 'kwargs': kwargs, 'timestamp': time.time(), 'code': None, 'msg': ''}
+
+    # 同理可添加多个进程...
+    
+    # 启动监护服务
+    handler.keep_proc_alive(response_queue, proc_status, logger)
+
     """
     logger.info(f'📛 Keep-process-alive service is running')
     logger.info(f'📛 Total {len(proc_status)} processes are running')
