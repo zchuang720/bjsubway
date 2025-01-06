@@ -43,14 +43,19 @@ def fire_alarm(pred_result, context, **kwargs):
     if polygon is not None:
         filter_outbounding_target(refine_result, polygon)
     
-    has_fire = check_fire_state(refine_result)
+    has_fire = check_has_fire(refine_result)
+    has_operator = check_has_operator(refine_result)
+    has_watcher = check_has_watcher(refine_result)
+    has_extinguisher = check_has_extinguisher(refine_result)
+    has_bucket = check_has_bucket(refine_result)
+    
     if has_fire:
-        if not check_watcher_state(refine_result):
+        if not has_watcher:
             alarm_event_id.append(8)    # 8.违规动火-看火人脱岗
-        if not check_extinguisher_state(refine_result) and not check_bucket_state(refine_result):
+        if not has_extinguisher and not has_bucket:
             alarm_event_id.append(9)    # 9.违规动火-周边未配备消防器材
     
-    fire_operator_state = check_fire_operator_state(refine_result)
+    fire_operator_state = check_fire_operator_state(refine_result, has_fire)
     if fire_operator_state == -1:
         alarm_event_id.append(11)       # 11.违规动火-非特种工动火
     elif fire_operator_state > 1 and 8 in alarm_event_id:
@@ -77,7 +82,8 @@ def fire_alarm(pred_result, context, **kwargs):
 
     # 发送警报post
     need_post = False
-    if len(alarm_event_id) > 0:
+    # 特殊处理 assert_has_fire: 实际有火才发送报警
+    if assert_has_fire(refine_result) and len(alarm_event_id) > 0:
         if 'post_alarm_event_id' not in context:
             context['post_alarm_event_id'] = {}
             

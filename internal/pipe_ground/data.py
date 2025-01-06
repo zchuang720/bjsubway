@@ -36,4 +36,4 @@ translated_cls_name = {
 }
 
 
-timer_duration = 20
+timer_duration = 100

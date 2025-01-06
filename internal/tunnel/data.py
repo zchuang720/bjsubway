@@ -30,11 +30,18 @@ class Event (Enum):
     noCar = auto()
     noCar_aboveThresh_noPerson = auto()
     noCar_aboveThresh_hasPerson = auto()
+    hasSteel = auto()
+    noSteel = auto()
+    noSteel_aboveThresh_hasPerson = auto()
+    noSteel_aboveThresh_noPerson = auto()
+
 
 event_timeout = {
-    Event.hasHole: 60,
+    Event.hasHole: 5,
     Event.noCar: 30 * 1 * 1,
-    Event.noCar_aboveThresh_hasPerson: 30
+    Event.noCar_aboveThresh_hasPerson: 30,
+    Event.noSteel: 60,
+    Event.noSteel_aboveThresh_hasPerson: 30,
 }
 
 

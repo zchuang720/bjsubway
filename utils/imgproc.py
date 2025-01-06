@@ -99,3 +99,24 @@ def yolo_cls_buff(size=3):
             return has_cls
         return wrapper
     return decorator
+
+
+# 判断类别缓冲函数装饰器，用于减轻结果波动
+def yolo_dual_check_cls_buff(size=3):
+    def decorator(func):
+        has_cls = False
+        cnt = 0
+        def wrapper(*args, **kwargs):
+            nonlocal has_cls, cnt
+            ret = func(*args, **kwargs)
+            if ret:
+                cnt = min(cnt + 1, size)
+            else:
+                cnt = max(0, cnt - 1)
+            if not has_cls and cnt == size:
+                has_cls = True
+            elif has_cls and cnt == 0:
+                has_cls = False
+            return has_cls and ret
+        return wrapper
+    return decorator

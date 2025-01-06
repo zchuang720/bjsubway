@@ -18,7 +18,7 @@ def check_has_steel(pred_result):
     return id_steel in pred_result.boxes.cls
 
 @yolo_cls_buff(yolo_cls_buff_size)
-def check_has_woking_face(pred_result):
+def check_has_working_face(pred_result):
     # 判断是否有开挖面
     return id_working_face in pred_result.boxes.cls
 
