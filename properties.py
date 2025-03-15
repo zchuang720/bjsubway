@@ -3,6 +3,9 @@
 # post_addr = 'https://zhgd.beijingmcc.com:3001/eqlog/log'
 # gongdiSN = '191000TE'
 
+# 17
+post_addr_17 = 'https://zhgd.beijingmcc.com:3001/eqlog/log'
+gongdiSN_17 = '13170427'
 # 04
 post_addr_04 = 'http://172.17.104.99:8099/device-front/log'
 gongdiSN_04 = '13040224'
@@ -39,6 +42,13 @@ gongdi07_cam_addr = {
     '回龙观-017': 'rtsp://admin:abcd1234@192.101.7.100/cam/realmonitor?channel=1&subtype=0',
     '回龙观-016': 'rtsp://admin:abcd1234@192.101.7.105/cam/realmonitor?channel=1&subtype=0',
     '回龙观-020': 'rtsp://admin:abcd1234@192.101.7.106/cam/realmonitor?channel=1&subtype=0',
+}
+
+gongdi17_cam_addr = {
+    '006': 'rtsp://admin:abcd1234@192.101.17.183/cam/realmonitor?channel=1&amp;subtype=0',
+    '007': 'rtsp://admin:abcd1234@192.101.17.153/cam/realmonitor?channel=1&amp;subtype=0',
+    '005': 'rtsp://admin:abcd1234@192.101.17.170/cam/realmonitor?channel=1&amp;subtype=0',
+    '003': 'rtsp://admin:abcd1234@192.101.17.171/cam/realmonitor?channel=1&amp;subtype=0',
 }
 
 # push stream address

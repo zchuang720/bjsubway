@@ -1,8 +1,9 @@
 # env and run file
-vscode/
+.vscode/
 runs/**/*
 logs/**/*
 outs/**/*
+web/rtsp2web_server/node_modules
 weights/archives/
 *.out
 

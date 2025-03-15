@@ -4,10 +4,11 @@ const url = require('url');
 const path = require('path');
 const { spawn } = require('child_process');
 
-// const serverIP = '123.125.19.139';   // 04
-const serverIP = '111.198.54.249';  // 03
 // const serverIP = '127.0.0.1';
-const srcPort = 556;
+// const serverIP = '123.125.19.139';   // 04
+// const serverIP = '111.198.54.249';  // 03
+const serverIP = '219.143.40.102';  // 17
+const srcPort = 25544;
 const forwardPort = 6102;
 
 const server = http.createServer((req, res) => {

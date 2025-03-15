@@ -1,14 +1,10 @@
-import os
 import sys
 import cv2
 import copy
-import threading
 import time
 import logging
 import numpy as np
-import multiprocessing as mp
 from copy import deepcopy
-from ultralytics import YOLO
 
 import utils.imgproc
 
