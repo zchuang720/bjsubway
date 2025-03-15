@@ -1,5 +1,7 @@
 import os
 os.environ['YOLO_VERBOSE'] = 'False'
+
+import torch
 import sys
 import cv2
 import copy
@@ -370,6 +372,74 @@ def test_gongdi03_24_4_22():
     # handler.keep_proc_alive(response_queue, proc_status, logger)
 
 
+def test_gongdi_17():
+    # ctx = multiprocessing.get_context('spawn')
+    log_file = 'logs/' + time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime()) + '.txt'
+    logger = logging.getLogger('MainLogger')
+    logger.setLevel(level = logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(processName)s - %(message)s')
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+    if log_file:
+        file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    
+    response_queue = multiprocessing.Queue()
+    proc_status = {}
+    
+    enable_push_stream = True
+    enable_playback = False
+
+    # tunnel
+    cam_names = ['006', '007', '003', '005']
+    for cam_name in cam_names:
+        cam_addr = properties.gongdi17_cam_addr[cam_name]
+        cam_ip = re.search(r'rtsp://\w+:\w+@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', cam_addr).group(1)
+        push_addr = 'rtsp://localhost:25544/stream/tunnel/' + cam_ip
+        context = {'post_data': {'name': cam_name, 'equipmentId': f'tunnel-{cam_ip}', 'brand': '久译'}}
+        alarm_func = [tunnel_alarm, tunnel_plot]
+        kwargs = {'video_addr': cam_addr, 'model': 'weights/20250309_steel_best.pt',
+                    'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 0, 
+                    'display': True, 'display_shape': 0.3, 'infer_imgsz': 1920,'save': False,
+                    'push_stream': enable_push_stream, 'push_url': push_addr, 'push_shape':0.6, 
+                    'loop': True, 'stream': True, 'monitor': False, 'playback': enable_playback, 
+                    'context': context, 'log_file': log_file, 'conf':0.3
+                    # 'response_queue': response_queue,
+                    }
+        process = multiprocessing.Process(target=handler.video_alarm_handler, kwargs=kwargs)
+        process.start()
+        proc_status[process.pid] = {'object': process, 'kwargs': kwargs, 'timestamp': time.time(), 'code': None, 'msg': ''}
+
+    # fire
+    cam_names = ['006', '007', '003', '005']
+    for cam_name in cam_names:
+        cam_addr = properties.gongdi17_cam_addr[cam_name]
+        cam_ip = re.search(r'rtsp://\w+:\w+@([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)', cam_addr).group(1)
+        push_addr = 'rtsp://localhost:25544/stream/fire' + cam_ip
+        context = {'post_data': {'name': cam_name, 'equipmentId': f'tunnel-{cam_ip}', 'brand': '久译'}}
+        alarm_func = [fire_alarm, fire_plot]
+        kwargs = {'video_addr': cam_addr, 'model': 'weights/20250309_fire_best.pt',
+                    'alarm_func': alarm_func[0], 'plot_func': alarm_func[1], 'interval': 0, 
+                    'display': True, 'display_shape': 0.3, 'infer_imgsz': 1280,'save': False,
+                    'push_stream': enable_push_stream, 'push_url': push_addr, 'push_shape':0.6, 
+                    'loop': True, 'stream': True, 'monitor': False, 'playback': enable_playback, 
+                    'context': context, 'log_file': log_file, "conf":0.7
+                    # 'response_queue': response_queue,
+                    }
+        process = multiprocessing.Process(target=handler.video_alarm_handler, kwargs=kwargs)
+        process.start()
+        proc_status[process.pid] = {'object': process, 'kwargs': kwargs, 'timestamp': time.time(), 'code': None, 'msg': ''}
+
+    # handler.keep_proc_alive(response_queue, proc_status, logger)
+
+
 
 if __name__ == "__main__":
-    test_gongdi03_24_4_22()
+    torch.multiprocessing.set_start_method('spawn')
+    test_gongdi_17()

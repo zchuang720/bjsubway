@@ -1,14 +1,11 @@
-import os
 import sys
 import cv2
 import copy
-import threading
 import time
 import logging
 import numpy as np
 import multiprocessing as mp
 from copy import deepcopy
-from ultralytics import YOLO
 
 import utils.imgproc
 
@@ -147,7 +144,7 @@ def fire_plot(img, alarm_result, **kwargs):
     # used_times.append(('polygon', time.time()))
     # 画目标框
     if 'refine_result' in alarm_result:
-        img_ret = alarm_result['refine_result'].plot(img=img_ret, conf=False)
+        img_ret = alarm_result['refine_result'].plot(img=img_ret, conf=True)
     # used_times.append(('yolo', time.time()))
     # 画警报信息
     if 'display_info' in alarm_result:

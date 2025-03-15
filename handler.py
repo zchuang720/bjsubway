@@ -75,7 +75,7 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
     # model setting
     device = kwargs['device'] if 'device' in kwargs else 'cuda:0'
     infer_imgsz = kwargs['imgsz'] if 'imgsz' in kwargs else 640
-    infer_conf = kwargs['conf'] if 'conf' in kwargs else 0.25
+    infer_conf = kwargs['conf'] if 'conf' in kwargs else 0.4
 
     # create logger
     log_file = None
