@@ -69,13 +69,13 @@ def video_alarm_handler(video_addr:str, model, interval:float=1.,
     无
     """
     # config
-    stream = kwargs['stream'] if 'stream' in kwargs else False      # to use stream video reader
-    context = kwargs['context'] if 'context' in kwargs else {}      # to store task context data
-    monitor = kwargs['monitor'] if 'monitor' in kwargs else False
+    stream = kwargs.get('stream', False)    # to use stream video reader
+    context = kwargs.get('context', {})     # to store task context data
+    monitor = kwargs.get('monitor', False)
     # model setting
-    device = kwargs['device'] if 'device' in kwargs else 'cuda:0'
-    infer_imgsz = kwargs['imgsz'] if 'imgsz' in kwargs else 640
-    infer_conf = kwargs['conf'] if 'conf' in kwargs else 0.4
+    device = kwargs.get('device', 'cuda:0')
+    infer_imgsz = kwargs.get('imgsz', 640)
+    infer_conf = kwargs.get('conf', 0.4)
 
     # create logger
     log_file = None

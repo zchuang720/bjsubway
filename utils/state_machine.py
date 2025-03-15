@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import time
 from typing import Any, Callable, Dict, List, Optional
 
-_DEBUG = True
+_DEBUG = False
 
 class EventType(Enum):
     TIMEOUT = "timeout"     # 超时事件类型
@@ -37,11 +37,11 @@ class State:
         action: Optional[Callable[[Dict], None]] = None
     ):
         """
-        event_type: 事件类型（TIMEOUT/NORMAL）
-        event_name: 事件名称标识符
-        target: 目标状态对象
-        condition: 可选的转移条件函数（接收context返回bool）
-        action: 转移发生时执行的动作函数（接收context）
+        - event_type: 事件类型（TIMEOUT/NORMAL）
+        - event_name: 事件名称标识符
+        - target: 目标状态对象
+        - condition: 可选的转移条件函数（接收context返回bool）
+        - action: 转移发生时执行的动作函数（接收context）
         """
         self.transitions.append(Transition(
             event_type=event_type,
@@ -58,9 +58,9 @@ class State:
         action: Optional[Callable[[Dict], None]] = None
     ):
         """
-        timeout: 超时时间（秒）
-        target: 超时后转移到的目标状态
-        action: 超时转移时执行的动作
+        - timeout: 超时时间（秒）
+        - target: 超时后转移到的目标状态
+        - action: 超时转移时执行的动作
         """
         self.timeout = timeout
         self.timeout_event = Event(EventType.TIMEOUT, "timeout")
